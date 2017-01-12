@@ -1,5 +1,6 @@
 # WP Blockade
 A visual editor for WordPress, based entirely within the WordPress editor.
+https://www.wpblockade.com
 ## Installation
 1. Download the zip file from Github
 2. Unzip it and upload the contents to your `wp-content/plugins` directory
