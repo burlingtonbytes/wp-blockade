@@ -51,3 +51,8 @@ Not at all! Blockade is a true visual editor, with all options controllable in a
 
 = 0.9.0 =
 * First public beta release
+
+== Upgrade Notice ==
+
+= 0.9.0 =
+Initial Release
