@@ -1,0 +1,245 @@
+html.wp-blockade-html {overflow-x: hidden;}
+html body.wp-blockade-body {
+	width: 100%;
+	max-width:100%;
+	/*height: 100%;*/
+	margin: 0;
+	padding: 0px 10px 40px !important;
+	box-sizing: border-box;
+	font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+	font-size: 14px;
+	line-height: 1.42857143;
+	color: #333;
+}
+
+/*fix firefox height issue*/
+*[contentEditable=true]:empty:before { content: "\feff "; }
+
+
+/*Fix Wordpresses awful UL/OL style*/
+.wp-blockade-showblocks ul, .wp-blockade-showblocks ol {
+	padding-left: 25px;
+}
+
+html.wp-blockade-dnd-inprogress { cursor: move !important; }
+.wp-blockade-showblocks .wp-blockade-dnd-placeholder,
+.wp-blockade-showblocks:empty:after,
+.wp-blockade-showblocks *[data-wp-blockade-role="container"]:empty:after,
+.wp-blockade-showblocks *[data-wp-blockade-type="spacer"]:empty:after {
+	display: block;
+	text-align: center;
+	font-style: italic;
+	padding: 10px;
+	color: #aaa;
+	border: 2px dashed #eee;
+	color: rgba(0,0,0,0.25);
+	border-color: rgba(0,0,0,0.1);
+	border-radius: 5px;
+	margin-top: 15px;
+}
+.wp-blockade-showblocks:empty {
+	cursor: not-allowed;
+}
+.wp-blockade-showblocks:empty:after {
+	content: "Add a block from the blockade menu to get started, or click to insert an editable area";
+	cursor: pointer;
+}
+.wp-blockade-showblocks *[data-wp-blockade-role="container"]:empty:after {
+	content: "Drag blocks here to place, or click to create a new editable area";
+	cursor: pointer;
+}
+.wp-blockade-showblocks *[data-wp-blockade-type="spacer"]:empty:after {
+	content: "Spacer";
+	border: none;
+	margin: 0;
+}
+
+.wp-blockade-showblocks .wp-blockade-dnd-placeholder {
+	color: #999;
+	border: 2px dashed #ddd;
+	color: rgba(0,0,0,0.35);
+	border-color: rgba(0,0,0,0.2);
+}
+.wp-blockade-showblocks .wp-blockade-dnd-placeholder:after {
+	content:"Drop Blockade Here";
+}
+.wp-blockade-showblocks .wp-blockade-wrapper, .wp-blockade-showblocks .wp-blockade-wrapper > .wp-blockade-controls {
+	-webkit-transition: all 0.3s ease-in-out;
+	-moz-transition: all 0.3s ease-in-out;
+	-o-transition: all 0.3s ease-in-out;
+	transition: all 0.3s ease-in-out;
+}
+.wp-blockade-showblocks .wp-blockade-wrapper {
+	box-sizing: border-box;
+	width: 100%;
+	display: block;
+	position: relative;
+	border: 2px solid #f3f3f3;
+	background-color: #fcfcfc;
+	border-color: rgba(0,0,0,0.05);
+	background-color: rgba(0,0,0,0.02);
+	border-radius: 5px;
+	margin-top: 15px;
+	padding-top: 10px;
+	overflow: visible;
+	/*prevent selections*/
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+.wp-blockade-showblocks .wp-blockade-wrapper:hover {
+	background-color: #f5f5f5;
+	border-color: #eee;
+	border-color: rgba(0,0,0,0.08);
+	background-color: rgba(0,0,0,0.05);
+}
+
+.wp-blockade-wrapper > .wp-blockade-controls {
+	display: none;
+}
+
+.wp-blockade-showblocks .wp-blockade-wrapper > .wp-blockade-controls {
+	display: block;
+	position: absolute;
+	top: -15px;
+	right: 10px;
+	text-align: right;
+	white-space:nowrap;
+	background-color: #ddd;
+	border: 1px solid #ccc;
+	border-color: rgba(0,0,0,0.3);
+	border-radius: 5px;
+	padding: 2px;
+	opacity: 0;
+	cursor: default;
+	color: #808;
+	font-family: arial,helvetica,sans-serif;
+	font-size: 17px;
+	line-height: 1.6471;
+	/* make unselectable */
+	-webkit-touch-callout: none;
+	-webkit-user-select  : none;
+	-khtml-user-select   : none;
+	-moz-user-select     : none;
+	-ms-user-select      : none;
+	-o-user-select       : none;
+	user-select          : none;
+}
+.wp-blockade-showblocks .wp-blockade-wrapper:hover > .wp-blockade-controls {
+	opacity: 0.5;
+}
+.wp-blockade-showblocks .wp-blockade-wrapper > .wp-blockade-controls:hover {
+	opacity: 1;
+}
+.wp-blockade-showblocks .wp-blockade-wrapper > .wp-blockade-controls > span {
+	font-weight: bold;
+	font-size: 12px;
+	vertical-align: middle;
+	padding-left: 10px;
+	padding-right: 10px;
+	margin-right: 5px;
+	border-right: 2px double #808;
+}
+.wp-blockade-showblocks .wp-blockade-wrapper > .wp-blockade-controls > div {
+	display: inline-block;
+	width: 18px;
+	height: 18px;
+	overflow: hidden;
+	margin: 0 5px -3px;
+	cursor: pointer;
+	color: #808;
+	position: relative;
+}
+.wp-blockade-showblocks .wp-blockade-wrapper > .wp-blockade-controls > div > span {
+	display: none;
+	position: absolute;
+	top: 10000px;
+}
+.wp-blockade-showblocks .wp-blockade-wrapper > .wp-blockade-controls > div:after {
+	display:block;
+	font-size: 16px;
+	line-height: 1;
+	font-family: fontawesome;
+	text-decoration: inherit;
+	font-weight: 400;
+	font-style: normal;
+	vertical-align: middle;
+	text-align: center;
+}
+
+.wp-blockade-showblocks .wp-blockade-wrapper.wp-blockade-flags-lockcontent   > .wp-blockade-controls > .wp-blockade-controls-lockcontent   { color: #ccc; }
+.wp-blockade-showblocks .wp-blockade-wrapper.wp-blockade-flags-lockposition  > .wp-blockade-controls > .wp-blockade-controls-lockposition  { color: #ccc; }
+.wp-blockade-showblocks .wp-blockade-wrapper.wp-blockade-flags-lockstructure > .wp-blockade-controls > .wp-blockade-controls-lockstructure { color: #ccc; }
+.wp-blockade-showblocks .wp-blockade-wrapper > .wp-blockade-controls > .wp-blockade-controls-options:after       { content: "\f085"; }
+.wp-blockade-showblocks .wp-blockade-wrapper > .wp-blockade-controls > .wp-blockade-controls-lockcontent:after   { content: "\f031"; }
+.wp-blockade-showblocks .wp-blockade-wrapper > .wp-blockade-controls > .wp-blockade-controls-lockposition:after  { content: "\f0b2"; }
+.wp-blockade-showblocks .wp-blockade-wrapper > .wp-blockade-controls > .wp-blockade-controls-lockstructure:after { content: "\f0c9"; }
+.wp-blockade-showblocks .wp-blockade-wrapper > .wp-blockade-controls > .wp-blockade-controls-clone:after         { content: "\f0c5"; }
+.wp-blockade-showblocks .wp-blockade-wrapper > .wp-blockade-controls > .wp-blockade-controls-delete:after        { content: "\f057"; }
+
+.wp-blockade-showblocks .wp-blockade {
+	/*overflow: hidden;*/
+	box-shadow: inset 0 10000px 0 0 rgba(196,196,196,0.3);
+}
+
+.wp-blockade-showblocks *[data-wp-blockade-role="editarea"],
+.wp-blockade-showblocks .wp-blockade-type-rawhtml .wp-blockade {
+	position: relative;
+	padding: 10px 15px;
+}
+.wp-blockade-showblocks *[data-wp-blockade-role="container"] {
+	padding-top: 10px;
+	padding-bottom: 10px;
+	padding-left: 15px;
+	padding-right: 15px;
+}
+
+
+.wp-blockade-showblocks .wp-blockade-wrapper {
+	cursor: move;
+}
+.wp-blockade-showblocks .wp-blockade-wrapper *[data-wp-blockade-role="editarea"] {
+	cursor: pointer;
+}
+.wp-blockade-showblocks .wp-blockade-wrapper *[data-wp-blockade-role="editarea"][contentEditable=true] {
+	cursor: text;
+	background-color: #fff;
+	background-color: rgba(255,255,255,0.3);
+	min-height: 10px;
+	/*restore selections*/
+	-webkit-touch-callout: initial;
+	-webkit-user-select  : text;
+	-khtml-user-select   : text;
+	-moz-user-select     : text;
+	-ms-user-select      : text;
+	user-select          : text;
+}
+
+/* visual aids for the editor */
+.wp-blockade-showblocks .row {
+	margin-left: 0;
+	margin-right: 0;
+}
+.wp-blockade-showblocks .row>div {
+    border-right: 1px dashed transparent;
+    border-left : 1px dashed transparent;
+}
+.wp-blockade-showblocks .row>div:first-child {
+	border-left-color: transparent !important;
+}
+
+.wp-blockade-showblocks .row>div:last-child {
+	border-right-color: transparent !important;
+}
+@media(min-width: 992px) {
+	.wp-blockade-showblocks .row>div.col-md-1 , .wp-blockade-showblocks .row>div.col-md-2 , .wp-blockade-showblocks .row>div.col-md-3,
+	.wp-blockade-showblocks .row>div.col-md-4 , .wp-blockade-showblocks .row>div.col-md-5 , .wp-blockade-showblocks .row>div.col-md-6,
+	.wp-blockade-showblocks .row>div.col-md-7 , .wp-blockade-showblocks .row>div.col-md-8 , .wp-blockade-showblocks .row>div.col-md-9,
+	.wp-blockade-showblocks .row>div.col-md-10, .wp-blockade-showblocks .row>div.col-md-11, .wp-blockade-showblocks .row>div.col-md-12 {
+		border-color: #ccc;
+		border-color: rgba(0,0,0,0.1);
+	}
+}

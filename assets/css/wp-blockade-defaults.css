@@ -1,0 +1,3 @@
+.wp-blockade { background-position: center center; }
+.wp-blockade > img.imageblock { display: block; margin: 0 auto; }
+.wp-blockade dl.row > dt { clear: left; }

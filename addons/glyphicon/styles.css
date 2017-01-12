@@ -1,0 +1,30 @@
+.wp-blockade .wp-blockade-glyphicon-wrapper {
+	display: block;
+	color: inherit;
+	text-decoration: none;
+	border: none;
+}
+.wp-blockade .wp-blockade-glyphicon-wrapper.wp-blockade-glyphicon-left {
+	text-align: left;
+}
+.wp-blockade .wp-blockade-glyphicon-wrapper.wp-blockade-glyphicon-center {
+	text-align: center;
+}
+.wp-blockade .wp-blockade-glyphicon-wrapper.wp-blockade-glyphicon-right {
+	text-align: right;
+}
+.wp-blockade .wp-blockade-glyphicon-wrapper.wp-blockade-glyphicon-1em {
+	font-size: 1em;
+}
+.wp-blockade .wp-blockade-glyphicon-wrapper.wp-blockade-glyphicon-2em {
+	font-size: 2em;
+}
+.wp-blockade .wp-blockade-glyphicon-wrapper.wp-blockade-glyphicon-3em {
+	font-size: 3em;
+}
+.wp-blockade .wp-blockade-glyphicon-wrapper.wp-blockade-glyphicon-4em {
+	font-size: 4em;
+}
+.wp-blockade .wp-blockade-glyphicon-wrapper.wp-blockade-glyphicon-5em {
+	font-size: 5em;
+}

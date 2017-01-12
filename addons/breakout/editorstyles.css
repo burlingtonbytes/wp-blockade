@@ -1,0 +1,9 @@
+body.wp-blockade-body .wp-blockade-wrapper.wp-blockade-type-breakout {
+	position: relative;
+	margin-left: -10px;
+	margin-right: -10px;
+}
+body.wp-blockade-body.wp-blockade-showblocks .wp-blockade-wrapper.wp-blockade-type-breakout {
+	margin-left: 0;
+	margin-right: 0;
+}
