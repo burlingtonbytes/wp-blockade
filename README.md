@@ -18,4 +18,5 @@ For usage directions, visit https://www.wpblockade.com/documentation.
 ## Credits
 Created by Burlington Bytes, a full service digital marketing company in Burlington, VT.
 ## License
-WP Blockade is licensed under version 3 of the GNU Public Licensing agreement.
+GPLv2 or later
+https://www.gnu.org/licenses/gpl-2.0.html
