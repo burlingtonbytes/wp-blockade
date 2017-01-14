@@ -1030,6 +1030,13 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 			self.body.innerHTML = "";
 			return;
 		}
+		// test if the content contains blocks, and if not, fix it
+		if( !isBlockaded( self.body.innerHTML ) ) {
+			var content = self.body.innerHTML;
+			self.body.innerHTML = '';
+			var block = createBlock( content );
+			self.body.appendChild(block);
+		}
 		var blocks = selectChildrenByClass(self.body, self.classes.blockade);
 		blocks.reverse(); // reverse array so inside is processed first
 		for (var i=0; i < blocks.length; i++) {
@@ -1094,15 +1101,12 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		return null;
 	}
 	function createBlock(content) {
-		el = self.document.createElement('div');
-		setRole(el, self.roles.editarea);
-		setData(el, self.datafields.type, 'content');
-		el.innerHTML = content;
-		var block    = convertToBlock(el);
+		var el    = wrapInContentBlock(content);
+		var block = convertToBlock(el);
 		return block;
 	}
 	function createBlockGroup() {
-		el = self.document.createElement('div');
+		var el = self.document.createElement('div');
 		setRole(el, self.roles.container);
 		setData(el, self.datafields.type, 'container');
 		var block = convertToBlock(el);
@@ -1131,6 +1135,23 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		wrap.appendChild(el);
 		wrap.appendChild(getMCEBlockadeControls(hasStructure, contenttype));
 		return wrap;
+	}
+	function isBlockaded( content ) {
+		if(typeof content == 'undefined') {
+			content = self.body.innerHTML;
+		}
+		// trivial check for blockade content (expand in the future)
+		//\sclass\s*=\s*"(?:[^"]*\s+)*wp-blockade[\s"]
+		var regex = "\\sclass\\s*=\\s*\"(?:[^\"]*\\s+)*" + self.classes.blockade + "[\\s\"]";
+		regex = new RegExp(regex, 'gi');
+		return regex.test(content);
+	}
+	function wrapInContentBlock(content) {
+		var el = self.document.createElement('div');
+		setRole(el, self.roles.editarea);
+		setData(el, self.datafields.type, 'content');
+		el.innerHTML = content;
+		return el;
 	}
 	function getMCEBlockadeControls(hasStructure, contenttype) {
 		var name = 'Block';
