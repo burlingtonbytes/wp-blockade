@@ -8,14 +8,14 @@ Stable tag: trunk
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Blockade is the WordPress editor done right. It's a lightweight, flexible visual
-page builder that lets you build stunning layouts directly from the editor.
+Blockade is the WordPress editor done right. It's a lightweight, flexible visual 
+page builder that lets you build stunning layouts in seconds.
 
 == Description ==
 
 > Blockade is in public beta. There may be frequent releases and features may change
 > as we work towards releasing version 1.0. Please let us know about your experience,
-> so we can make Blockade the best experience for everyone.
+> so we can make Blockade even better.
 
 = Blockade will change the way you look at designing and building for the web =
 
