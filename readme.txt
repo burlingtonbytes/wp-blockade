@@ -66,16 +66,17 @@ Learn more at https://www.wpblockade.com
 
 = Why should I choose Blockade, over other visual page builders? =
 
-Blockade is lightweight and flexible, and integrates well with existing themes. It can even use your own version of Bootstrap, to make page loads as
-fast as possible.
+Blockade is lightweight and flexible, and integrates well with existing themes.
+It can even use your own version of Bootstrap, to make page loads as fast as possible.
 
 = Do I need to know HTML or CSS to use Blockade? =
 
-Not at all! Blockade is a true visual editor, with all options controllable in a simple drag and drop interface.
+Not at all! Blockade is a true visual editor, with all options controllable in a
+simple drag and drop interface.
 
-= Where can I learn more? =
+= See more frequently asked questions =
 
-https://www.wpblockade.com
+https://www.wpblockade.com/frequently-asked-questions/
 
 == Screenshots ==
 
