@@ -1,13 +1,14 @@
 <?php if(!defined('ABSPATH')) { die(); } // Include in all php files, to prevent direct execution
 /*
  * Plugin Name: WP Blockade
- * Author: Greg Schoppe
+ * Author: Burlington Bytes
+ * Author URI: https://www.burlingtonbytes.com
  * Description: The first WordPress page builder to be fully integrated into the existing visual editor! With Blockade, what you see really is what you get!
- * Version: 0.9.0
+ * Version: 0.9.1
  */
 if( !class_exists('WP_Blockade') ) {
 	class WP_Blockade {
-		private $version = 'v0.9.0';
+		private $version = 'v0.9.1';
 		private static $_this;
 		private $plugin_dir;
 		private $plugin_dir_url;

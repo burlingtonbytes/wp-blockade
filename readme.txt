@@ -43,7 +43,7 @@ for our team and our clients.
 
 Now we're ready to revolutionize editing for everyone else.
 
-Learn more at https://www.wpblockade.com
+Learn more at [https://www.wpblockade.com](https://www.wpblockade.com)
 
 = Blockade Features =	
 *   Content Blocks: HTML, Photo, Video, Button, Text & Map
@@ -76,7 +76,7 @@ simple drag and drop interface.
 
 = See more frequently asked questions =
 
-https://www.wpblockade.com/frequently-asked-questions/
+[https://www.wpblockade.com/frequently-asked-questions/](https://www.wpblockade.com/frequently-asked-questions/)
 
 == Screenshots ==
 
@@ -86,7 +86,11 @@ https://www.wpblockade.com/frequently-asked-questions/
 
 == Changelog ==
 
-= 0.9.0 =
+= 0.9.1 (01/20/2017) =
+* Added support for image sizes
+* fixed bug with initial transformation to blockade compatible
+
+= 0.9.0 (01/14/2017) =
 * First public beta release
 
 == Upgrade Notice ==

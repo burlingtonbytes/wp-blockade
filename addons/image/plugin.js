@@ -3,7 +3,7 @@
 	Plugin URI: http://www.burlingtonbytes.com
 	Author: Burlington Bytes
 	Author URI: http://www.burlingtonbytes.com
-	Version: 0.9.0
+	Version: 0.9.1
 */
 tinymce.PluginManager.add('image_block', function(editor, url) {
 	// kill if older than IE8
@@ -61,7 +61,7 @@ tinymce.PluginManager.add('image_block', function(editor, url) {
 				for( var i=0; i<classes.length; i++ ) {
 					var match = classes[i].match(exp);
 					if( match && match.length > 1 ) {
-						data.id = match[1];
+						data.type_specific.image.id = match[1];
 						break;
 					}
 				}
@@ -103,14 +103,23 @@ tinymce.PluginManager.add('image_block', function(editor, url) {
 		apply_form_results : function( data, form_data, block ) {
 			attachmentData = JSON.parse( form_data.main_image );
 			if( attachmentData && attachmentData.url ) {
+				var image = attachmentData;
+				var size = 'full';
+				if(attachmentData.size) {
+					size = attachmentData.size;
+					if( attachmentData.sizes && attachmentData.sizes[size] ) {
+						image = attachmentData.sizes[size];
+					}
+				}
+
 				var image = [
 					'<img',
-					' src="' + attachmentData.url + '"',
+					' src="' + image.url + '"',
 					' alt="' + attachmentData.caption + '"',
 					' title="' + attachmentData.title + '"',
-					' width="' + attachmentData.width + '"',
-					' height="' + attachmentData.height + '"',
-					' class="imageblock size-full wp-image-' + attachmentData.id + '"',
+					' width="' + image.width + '"',
+					' height="' + image.height + '"',
+					' class="imageblock size-' + size + ' wp-image-' + attachmentData.id + '"',
 					'>'
 				].join('');
 				var content = image;

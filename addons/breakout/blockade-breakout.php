@@ -4,7 +4,7 @@
  * Slug: blockade_breakout
  * Author: Greg Schoppe
  * Description: break out of the container to full width
- * Version: 0.9.0
+ * Version: 0.9.1
  */
  if( !class_exists('BlockadeBreakout') ) {
 	class BlockadeBreakout {

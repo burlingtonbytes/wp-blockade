@@ -4,7 +4,7 @@
  * Slug: image_block
  * Author: Greg Schoppe
  * Description: Insert images directly as block-level elements
- * Version: 0.9.0
+ * Version: 0.9.1
  */
  if( !class_exists('BlockadeImageBlock') ) {
 	class BlockadeImageBlock {

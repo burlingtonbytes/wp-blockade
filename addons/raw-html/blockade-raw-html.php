@@ -4,7 +4,7 @@
  * Slug: blockade_raw_html
  * Author: Greg Schoppe
  * Description: Create Raw HTML elements, and incorporate container and editable areas directly
- * Version: 0.9.0
+ * Version: 0.9.1
  */
  if( !class_exists('BlockadeRawHTML') ) {
 	class BlockadeRawHTML {

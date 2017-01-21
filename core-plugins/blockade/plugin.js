@@ -5,7 +5,7 @@
  *	Author URI: http://www.burlingtonbytes.com
  *	Description: Blockade is the core plugin to the WPBlockade TinyMCE management suite.  It provides a simple visual pagebuilder within the TinyMCE Editor
  *	Editor Buttons: hideblockades,blockades
- *	Version: 0.9.0
+ *	Version: 0.9.1
 */
 tinymce.PluginManager.add('blockade', function(editor, url) {
 	// SECTION ---------------------------------------------------------- INITIALIZE
@@ -29,7 +29,10 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 	self.editor     = editor;
 	self.document   = false;
 	self.body       = false;
-	self.wrapInUndo = false;
+	self.wrapInUndo = function(callback) {
+		// placeholder for the undo transaction function, until it is initialized
+		callback();
+	};
 	self.idbase     = 'wp-blockade';
 	self.classes    = {
 		blockade    : self.idbase,
@@ -534,10 +537,12 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 			],
 			onsubmit: function(e) {
 				var form_data = get_option_form_data(e);
-				apply_default_options_form_results( data, form_data, block );
-				if( type_options.apply_form_results ) {
-					 type_options.apply_form_results( data, form_data, block );
-				}
+				self.wrapInUndo(function() {
+					apply_default_options_form_results( data, form_data, block );
+					if( type_options.apply_form_results ) {
+						 type_options.apply_form_results( data, form_data, block );
+					}
+				});
 			}
 		});
 	}
@@ -758,7 +763,11 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		if( form_data['bg_image'] ) {
 			var image_data = JSON.parse(form_data['bg_image']);
 			if( image_data && image_data.url && image_data.url != self.assets.no_image ) {
-				bg_str += "background-image:url('" + image_data.url + "');";
+				var image_url = image_data.url;
+				if( image_data.size && image_data.sizes[image_data.size] && image_data.sizes[image_data.size].url ) {
+					image_url = image_data.sizes[image_data.size].url;
+				}
+				bg_str += "background-image:url('" + image_url + "');";
 			}
 		}
 		if( form_data['bg_style'] && form_data['bg_style'] != 'default' ) {
@@ -861,23 +870,50 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 					e.stopPropagation();
 					e.preventDefault();
 					if( !media_frame ) {
+						var insertImage = wp.media.controller.Library.extend({
+							defaults :  _.defaults({
+								id:        'insert-image',
+								title:      'Select or Upload an Image',
+								allowLocalEdits: true,
+								displaySettings: true,
+								displayUserSettings: true,
+								multiple : false,
+								type : 'image'//audio, video, application/pdf, ... etc
+							}, wp.media.controller.Library.prototype.defaults )
+						});
 						media_frame = wp.media({
-							title: 'Select or Upload an Image',
 							button: {
 								text: 'Insert Image'
 							},
-							multiple: false  // Set to true to allow multiple files to be selected
+							state : 'insert-image',
+							states : [
+								new insertImage()
+							]
 						});
 					}
-					media_frame.once( 'select', function() {
+					media_frame.once( 'open', function() {
+						var selection    = media_frame.state().get('selection');
+						var parent       = e.target.parentElement;
+						var imagefield   = parent.querySelector('.blockade-options-image-data');
+						var imageData    = JSON.parse(imagefield.value);
+						if( imageData && imageData.id ) {
+							attachment = wp.media.attachment(imageData.id);
+							attachment.fetch();
+							selection.add( attachment ? [ attachment ] : [] );
+						}
+					});
+					media_frame.once( 'close', function() {
+						var state = media_frame.state('insert-image');
 						var parent       = e.target.parentElement;
 						var previewwrap  = parent.querySelector('.blockade-options-image-preview');
 						var imagefield   = parent.querySelector('.blockade-options-image-data');
 						var del          = parent.querySelector('.blockade-options-image-remove');
-						var attachment   = media_frame.state().get('selection').first().toJSON();
-
-						imagefield.value = JSON.stringify( attachment );
-						previewwrap.innerHTML = '<img src="' + attachment.url + '" alt="' + attachment.caption + '" title="' + attachment.title + '">';
+						var attachment   = media_frame.state().get('selection').first();
+						var selection    = attachment.toJSON();
+						var display      = state.display( attachment ).toJSON();
+						var value = _.defaults( selection, display );
+						imagefield.value = JSON.stringify( value );
+						previewwrap.innerHTML = '<img src="' + selection.url + '" alt="' + selection.caption + '" title="' + selection.title + '">';
 						if( del ) {
 							addClass( del, 'blockade-options-image-remove-visible' );
 						}
