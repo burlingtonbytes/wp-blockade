@@ -4,11 +4,11 @@
  * Slug: blockade_breakout
  * Author: Greg Schoppe
  * Description: break out of the container to full width
- * Version: 0.9.1
+ * Version: 0.9.2
  */
  if( !class_exists('BlockadeBreakout') ) {
 	class BlockadeBreakout {
-		private $version = 'v1.0.0';
+		private $version = 'v0.9.2';
 		private static $_this;
 		private $addon_dir;
 		private $addon_dir_url;

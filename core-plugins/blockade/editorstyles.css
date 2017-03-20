@@ -15,6 +15,13 @@ html body.wp-blockade-body {
 /*fix firefox height issue*/
 *[contentEditable=true]:empty:before { content: "\feff "; }
 
+.wp-blockade .wp-blockade-shortcode-preview {
+	width: 100%;
+	height: 1px;
+	border: none;
+	overflow: hidden;
+	pointer-events: none;
+}
 
 /*Fix Wordpresses awful UL/OL style*/
 .wp-blockade-showblocks ul, .wp-blockade-showblocks ol {
@@ -61,7 +68,7 @@ html.wp-blockade-dnd-inprogress { cursor: move !important; }
 	border-color: rgba(0,0,0,0.2);
 }
 .wp-blockade-showblocks .wp-blockade-dnd-placeholder:after {
-	content:"Drop Blockade Here";
+	content:"Drop Block Here";
 }
 .wp-blockade-showblocks .wp-blockade-wrapper, .wp-blockade-showblocks .wp-blockade-wrapper > .wp-blockade-controls {
 	-webkit-transition: all 0.3s ease-in-out;
@@ -216,6 +223,37 @@ html.wp-blockade-dnd-inprogress { cursor: move !important; }
 	-moz-user-select     : text;
 	-ms-user-select      : text;
 	user-select          : text;
+}
+/*comment styles*/
+.wp-blockade-type-comment {
+	display: none;
+}
+.wp-blockade-showblocks .wp-blockade-type-comment > .wp-blockade-comment {
+	display: block;
+	font-family: Consolas,monaco,monospace;
+	color: #808;
+	font-style: italic;
+	text-align: center;
+	font-weight: 200;
+	padding-left: 50px;
+	padding-right: 50px;
+	position: relative;
+	background-color: #fef;
+	box-shadow: none;
+}
+.wp-blockade-showblocks .wp-blockade-type-comment > .wp-blockade-comment:before {
+	display: block;
+	position: absolute;
+	left: 5px;
+	top: 0;
+	content: '<!--';
+}
+.wp-blockade-showblocks .wp-blockade-type-comment > .wp-blockade-comment:after {
+	display: block;
+	position: absolute;
+	right: 5px;
+	top: 0;
+	content: '-->';
 }
 
 /* visual aids for the editor */

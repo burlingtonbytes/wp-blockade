@@ -8,7 +8,7 @@ Stable tag: trunk
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Blockade is the WordPress editor done right. It's a lightweight, flexible visual 
+Blockade is the WordPress editor done right. It's a lightweight, flexible visual
 page builder that lets you build stunning layouts in seconds.
 
 == Description ==
@@ -20,7 +20,7 @@ page builder that lets you build stunning layouts in seconds.
 = Blockade will change the way you look at designing and building for the web =
 
 Page builders are usually overbuilt and hard to learn to use effectively. Blockade
-turns that trend on its head, and provides a lightweight page builder that 
+turns that trend on its head, and provides a lightweight page builder that
 integrates directly into your site's existing interface. With Blockade, you can
 build beautiful, professional, and standards-compliant responsive layouts, in
 seconds.
@@ -45,7 +45,7 @@ Now we're ready to revolutionize editing for everyone else.
 
 Learn more at [https://www.wpblockade.com](https://www.wpblockade.com)
 
-= Blockade Features =	
+= Blockade Features =
 *   Content Blocks: HTML, Photo, Video, Button, Text & Map
 *   Structure Blocks: Simple Columns, Groups, and Full-Width Breakouts
 *   Lightweight, semantic markup for maximum performance and accessibility
@@ -85,6 +85,14 @@ simple drag and drop interface.
 3. You can even live preview your page, without ever leaving the WordPress editor
 
 == Changelog ==
+
+= 0.9.2 (03/19/2017) =
+* Added Experimental Live Sidebar Block
+* Added Experimental Live Shortcode Block
+* Added New Sidebar Columns
+* Added Optional Support for Bootstrap 4 alpha
+* Added filter to remove Bootstrap
+(Note: Some Block Types will not function without Bootstrap, and will need to be replaced)
 
 = 0.9.1 (01/20/2017) =
 * Added support for image sizes

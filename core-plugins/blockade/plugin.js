@@ -5,7 +5,7 @@
  *	Author URI: http://www.burlingtonbytes.com
  *	Description: Blockade is the core plugin to the WPBlockade TinyMCE management suite.  It provides a simple visual pagebuilder within the TinyMCE Editor
  *	Editor Buttons: hideblockades,blockades
- *	Version: 0.9.1
+ *	Version: 0.9.2
 */
 tinymce.PluginManager.add('blockade', function(editor, url) {
 	// SECTION ---------------------------------------------------------- INITIALIZE
@@ -21,7 +21,9 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 	var protocol = (window.location.protocol == "https:")?'https:':'http:';
 	editor.contentCSS.push(protocol + '//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css');
 	editor.contentCSS.push(url+'/editorstyles.css');
-	editor.contentCSS.push(url+'../../../assets/css/wp-blockade-bootstrap.min.css');
+	if(typeof editor.settings.wp_blockade_framework_css !== 'undefined' && editor.settings.wp_blockade_framework_css) {
+		editor.contentCSS.push(editor.settings.wp_blockade_framework_css);
+	}
 	editor.contentCSS.push(url+'../../../assets/css/wp-blockade-defaults.css');
 
 	// register public variables and functions
@@ -42,6 +44,8 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		wrapper     : self.idbase + '-wrapper',
 		editwrapper : self.idbase + '-editareawrapper',
 		controlbox  : self.idbase + '-controls',
+		comment     : self.idbase + "-comment",
+		shortcode   : self.idbase + "-shortcode",
 		rolebase    : self.idbase + '-role'
 	};
 	self.classes.usertypes = {
@@ -58,7 +62,10 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		clone         : self.classes.controlbox + '-clone',
 		deleteblock   : self.classes.controlbox + '-delete'
 	};
-	self.internalClasses = [ self.classes.blockade ];
+	self.internalClasses = [
+		self.classes.blockade,
+		self.classes.comment
+	];
 	self.datafields = {
 		role    : self.idbase + '-role',
 		type    : self.idbase + '-type',
@@ -68,7 +75,7 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 	// blocks
 	self.roles = {
 		editarea  : "editarea",
-		container : "container"
+		container : "container",
 	};
 	// flags
 	self.flags = {
@@ -90,6 +97,29 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		},
 		container : {
 			name : "Container"
+		},
+		comment : {
+			name: "Comment",
+			parse_block_data : function( data, block ) {
+				data.type_specific.content = block.textContent;
+				return data;
+			},
+			render_options : function( data ) {
+				return {
+					'Comment': [
+						'<label>',
+							'<span>Comment Text: </span>',
+							'<input type="text" name="comment" class="mce-textbox" value="' + data.type_specific.content + '"/>',
+						'</label>',
+					].join(''),
+					'Spacing': null,
+					'Background': null,
+					'Custom': null
+				};
+			},
+			apply_form_results : function( data, form_data, el ) {
+				el.textContent = form_data.comment;
+			}
 		},
 		spacer : {
 			name: "Spacer",
@@ -158,6 +188,20 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 			}
 		},
 		{
+			text: 'Comment',
+			onclick: function() {
+				if(isPlaceable(self.body)) {
+					var el = self.document.createElement('div');
+					setData(el, self.datafields.type, 'comment');
+					addClass(el, self.classes.comment);
+					var block = convertToBlock( el );
+					placeBlock(block);
+					removeActiveEditor();
+					self.editor.fire(self.events.options, {target: block});
+				}
+			}
+		},
+		{
 			text: 'Structural Blocks',
 			menu: [
 				{
@@ -210,8 +254,10 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 	self.options_make_image_uploader_html = function( name, slug, datastr, del   ) { return options_make_image_uploader_html( name, slug, datastr, del ); };
 	self.options_make_color_picker_html   = function( name, slug, value          ) { return options_make_color_picker_html( name, slug, value          ); };
 	self.options_make_select_box_html     = function( name, slug, options, value ) { return options_make_select_box_html( name, slug, options, value   ); };
-	self.escapeHtml                       = function( html                       ) { return escapeHtml( html   ); };
-	self.unescapeHtml                     = function( html                       ) { return unescapeHtml( html ); };
+	self.escapeHtml    = function( html ) { return escapeHtml( html   ); };
+	self.unescapeHtml  = function( html ) { return unescapeHtml( html ); };
+	self.build_shortcode_iframe = function( a, b ) { return build_shortcode_iframe( a, b ); };
+	window.wp_blockade_resize_iframe = function( el   ) { return resize_iframe( el  ); }
 
 	// SECTION ------------------------------------------------------------- INITIALIZE EDITOR
 	editor.on('init', function() {
@@ -716,8 +762,14 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		return customdata;
 	}
 	function apply_default_options_form_results( data, form_data, el ) {
-		var customclasses = form_data.classes.trim();
-		var customstyles  = form_data.styles.trim();
+		var customclasses = '',
+			customstyles = '';
+		if( typeof form_data.classes !== 'undefined' ) {
+			var customclasses = form_data.classes.trim();
+		}
+		if( typeof form_data.styles !== 'undefined' ) {
+			var customstyles  = form_data.styles.trim();
+		}
 		var classes = data.internal.classes.join(' ');
 		if(classes && customclasses) {
 			classes +=' ';
@@ -736,23 +788,27 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 
 		// apply margins & padding
 		var margin_padding_str = "";
-		var margin = convert_data_to_trbl( {
-			top    : form_data['margin-top'   ],
-			right  : form_data['margin-right' ],
-			bottom : form_data['margin-bottom'],
-			left   : form_data['margin-left'  ],
-		} );
-		if( margin ) {
-			margin_padding_str += 'margin:' + margin + ';';
+		if( typeof form_data['margin-top'   ] !== 'undefined' ) {
+			var margin = convert_data_to_trbl( {
+				top    : form_data['margin-top'   ],
+				right  : form_data['margin-right' ],
+				bottom : form_data['margin-bottom'],
+				left   : form_data['margin-left'  ],
+			} );
+			if( margin ) {
+				margin_padding_str += 'margin:' + margin + ';';
+			}
 		}
-		var padding = convert_data_to_trbl( {
-			top    : form_data['padding-top'   ],
-			right  : form_data['padding-right' ],
-			bottom : form_data['padding-bottom'],
-			left   : form_data['padding-left'  ],
-		} );
-		if( padding ) {
-			margin_padding_str += 'padding:' + padding + ';';
+		if( typeof form_data['padding-top'   ] !== 'undefined' ) {
+			var padding = convert_data_to_trbl( {
+				top    : form_data['padding-top'   ],
+				right  : form_data['padding-right' ],
+				bottom : form_data['padding-bottom'],
+				left   : form_data['padding-left'  ],
+			} );
+			if( padding ) {
+				margin_padding_str += 'padding:' + padding + ';';
+			}
 		}
 		styles = margin_padding_str + styles;
 		// apply background
@@ -1041,8 +1097,14 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 					if( classes.indexOf(self.classes.wrapper)>-1 || classes.indexOf(self.classes.editwrapper)>-1 ) {
 						node.unwrap();
 					}
-					if( classes.indexOf(self.classes.controlbox)>-1 ) {
+					if( classes.indexOf(self.classes.controlbox)>-1 || classes.indexOf( self.classes.shortcode + '-preview' )>-1 ) {
 						node.remove();
+					}
+					if( classes.indexOf(self.classes.comment) > -1 ) {
+						var commentText = node.firstChild.value;
+						var comment = new tinymce.html.Node('#comment', 8);
+						comment.value = self.classes.comment + '::' + commentText;
+						node.replace( comment );
 					}
 				}
 			}
@@ -1082,14 +1144,32 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 				replaceNode(blocks[i], wrapped);
 			}
 		}
+		var comments = getComments(self.document);
+		for(var i = 0; i < comments.length; i++) {
+			var comment = comments[i];
+			var text = comment.textContent;
+			var commentprefix = self.classes.comment + '::';
+			var shortcodeprefix = self.classes.shortcode + '::';
+			if( text.indexOf(commentprefix) === 0 ) {
+				text = text.slice(commentprefix.length);
+				var el = self.document.createElement('div');
+				el.textContent = text;
+				setData(el, self.datafields.type, 'comment');
+				addClass(el, self.classes.comment);
+				var block = convertToBlock( el );
+				comment.parentNode.replaceChild(block, comment);
+			} else if( text.indexOf(shortcodeprefix) === 0 ) {
+				shortcode = text.slice( shortcodeprefix.length );
+				var el = build_shortcode_iframe( shortcode );
+				comment.parentNode.insertBefore(el, comment);
+			}
+		}
 		// get rid of cluttered &nbsp;s
 		var cleanableAreas = selectChildrenByRole(self.body, self.roles.editable);
 		var containers     = selectChildrenByRole(self.body, self.roles.container);
 		Array.prototype.push.apply(cleanableAreas, containers); // adds containers to the end of cleanableAreas
 		for (var i=0; i < cleanableAreas.length; i++) {
-			if(cleanableAreas[i].innerHTML === '&nbsp;' ||
-			   cleanableAreas[i].innerHTML === '&nbsp;<br/>' ||
-			   cleanableAreas[i].innerHTML === '&nbsp;<br>') {
+			if( isEmptyish(cleanableAreas[i]) ) {
 				cleanableAreas[i].innerHTML = "";
 			}
 		}
@@ -1601,7 +1681,28 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		}
 		return classes;
 	}
-
+	function build_shortcode_iframe( shortcode, wrapping_classes ) {
+		if( typeof wrapping_classes === 'undefined' ) {
+			wrapping_classes='';
+		}
+		var id = document.getElementById('post_ID').value;
+		var uri = [
+			ajaxurl.match( /.*\// ),
+			'admin-post.php?action=wp-blockade-shortcode-render',
+			'&shortcode=' + encodeURIComponent( shortcode ),
+			'&id=' + id,
+			'&classes=' + encodeURIComponent( wrapping_classes )
+		].join('');
+		var el = self.document.createElement('iframe');
+		el.setAttribute( 'src', uri );
+		el.setAttribute( 'class',  self.classes.shortcode + '-preview' );
+		el.setAttribute( 'scrolling', 'no');
+		el.setAttribute( 'onload', 'window.top.wp_blockade_resize_iframe(this);' );
+		return el;
+	}
+	function resize_iframe(obj) {
+		obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
+	}
 	// options elements
 	function options_make_accordion_html( title, content) {
 		var str = [
@@ -1827,6 +1928,23 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 	}
 
 	// jQuery equivalents
+	function getComments( parent ) {
+		if(typeof parent === 'undefined') {
+			parent = self.document;
+		}
+		function traverseDom(curr_element) {
+			var comments = new Array();
+			if (curr_element.nodeName == "#comment" || curr_element.nodeType == 8) {
+				comments[comments.length] = curr_element;
+			} else if(curr_element.childNodes.length>0) {
+				for (var i = 0; i<curr_element.childNodes.length; i++) {
+					comments = comments.concat(traverseDom(curr_element.childNodes[i]));
+				}
+			}
+			return comments;
+		}
+		return traverseDom(parent);
+	}
 	function getData(el, datafield) {
 		return el.getAttribute('data-'+datafield);
 	}

@@ -4,7 +4,7 @@
  * Slug: glyphicon_block
  * Author: Greg Schoppe
  * Description: Insert glyphicons directly as block-level elements
- * Version: 0.9.1
+ * Version: 0.9.2
  */
  if( !class_exists('BlockadeGlyphiconBlock') ) {
 	class BlockadeGlyphiconBlock {

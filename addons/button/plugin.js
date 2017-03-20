@@ -3,7 +3,7 @@
 	Plugin URI: http://www.burlingtonbytes.com
 	Author: Burlington Bytes
 	Author URI: http://www.burlingtonbytes.com
-	Version: 0.9.1
+	Version: 0.9.2
 */
 tinymce.PluginManager.add('button_block', function(editor, url) {
 	// kill if older than IE8

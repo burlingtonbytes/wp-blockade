@@ -4,7 +4,7 @@
  * Slug: video_block
  * Author: Greg Schoppe
  * Description: Insert YouTube and Vimeo videos directly as block-level elements
- * Version: 0.9.1
+ * Version: 0.9.2
  */
  if( !class_exists('BlockadeVideoBlock') ) {
 	class BlockadeVideoBlock {

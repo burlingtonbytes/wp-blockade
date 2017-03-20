@@ -1,19 +1,21 @@
 <?php if(!defined('ABSPATH')) { die(); } // Include in all php files, to prevent direct execution
 /*
  * Plugin Name: WP Blockade
+ * Plugin URI: https://www.wpblockade.com/
  * Author: Burlington Bytes
  * Author URI: https://www.burlingtonbytes.com
- * Description: The first WordPress page builder to be fully integrated into the existing visual editor! With Blockade, what you see really is what you get!
- * Version: 0.9.1
+ * Description: Lightweight and intuitive Visual Editor for Designers, Developers, and End Users.
+ * Version: 0.9.2
  */
 if( !class_exists('WP_Blockade') ) {
 	class WP_Blockade {
-		private $version = 'v0.9.1';
+		private $version = 'v0.9.2';
 		private static $_this;
 		private $plugin_dir;
 		private $plugin_dir_url;
 		private $editors;
 		private $post_types;
+		private $wpautop_disabled = false;
 		private $default_opts = array(
 			'editors' => array(),
 			'required_plugins' => array(
@@ -96,14 +98,14 @@ if( !class_exists('WP_Blockade') ) {
 		private function __construct() {
 			$this->plugin_dir = dirname( __FILE__ );
 			$this->plugin_dir_url = plugin_dir_url( __FILE__ );
-
 			add_action( 'init'              , array( $this, 'load_blockade' ), PHP_INT_MAX ); // run this action last, so all post types are populated
 			add_filter( 'extra_wp_blockade_custom_block_headers', array( $this, 'wp_blockade_custom_block_headers' ) );
 			add_action( 'the_post'          , array( $this, 'wp_blockade_disable_wpautop' ) );
+			add_filter( 'the_content'       , array( $this, 'filter_blockade_shortcodes' ), ~PHP_INT_MAX );
 			add_filter( 'the_content'       , array( $this, 'wp_blockade_strip_data_tags' ) );
 			add_action( 'loop_end'          , array( $this, 'wp_blockade_enable_wpautop' ) );
 			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles_and_scripts' ) );
-
+			add_action( 'admin_post_wp-blockade-shortcode-render', array( $this, 'render_shortcode_preview') );
 		}
 
 		// Public Static Functions ACCESSIBLE WITHOUT INSTANTIATION
@@ -215,6 +217,17 @@ if( !class_exists('WP_Blockade') ) {
 						$tinymce_options['blockade_allow_custom_colors'] = false;
 					}
 				}
+				$bootstrap = get_theme_support( 'bootstrap' );
+				$bootstrap_major_version = "3";
+				if( $bootstrap ) {
+					$bootstrap_major_version = $bootstrap[0];
+				}
+				$framework_css = $this->plugin_dir_url . 'assets/css/wp-blockade-bootstrap.v3.3.7.min.css';
+				if( $bootstrap && version_compare( $bootstrap, '4.0.0', '>=' ) ) {
+					$framework_css = $this->plugin_dir_url . 'assets/css/wp-blockade-bootstrap.v4.0.0.a6.min.css';
+				}
+				$tinymce_options['wp_blockade_bootstrap_major_version'] = $bootstrap_major_version;
+				$tinymce_options['wp_blockade_framework_css'] = apply_filters( 'wp-blockade-framework-css', $framework_css );
 				// remove offending plugins
 				$tinymce_options['plugins'                ] = $this->blockade_modify_csl( $tinymce_options['plugins'], null, $this->options['bad_plugins'] );
 				// fix the &nbsp; issue
@@ -237,24 +250,26 @@ if( !class_exists('WP_Blockade') ) {
 			if( in_array( $post->post_type, $this->post_types ) ) {
 				remove_filter( 'the_content', 'wpautop' );
 				remove_filter( 'the_excerpt', 'wpautop' );
-			} else {
-				if( !has_filter( 'the_content', 'wpautop' ) ) {
-					add_filter( 'the_content', 'wpautop' );
-				}
-				if( !has_filter( 'the_excerpt', 'wpautop' ) ) {
-					add_filter( 'the_excerpt', 'wpautop' );
-				}
+				$this->wpautop_disabled = true;
+			} elseif( $this->wpautop_disabled ) {
+				add_filter( 'the_content', 'wpautop' );
+				add_filter( 'the_excerpt', 'wpautop' );
+				$this->wpautop_disabled = false;
 			}
 		}
 
-		public function wp_blockade_enable_wpautop() {
-			if( !has_filter( 'the_content', 'wpautop' ) ) {
+		public function wp_blockade_enable_wpautop($query) {
+			if( $this->wpautop_disabled ) {
 				add_filter( 'the_content', 'wpautop' );
-			}
-
-			if( !has_filter( 'the_excerpt', 'wpautop' ) ) {
 				add_filter( 'the_excerpt', 'wpautop' );
+				$this->wpautop_disabled = false;
 			}
+		}
+
+		public function filter_blockade_shortcodes( $content ) {
+			$pattern = '/<!--wp-blockade-shortcode::(\[[^\]]+\])-->/';
+			$content = preg_replace( $pattern , "$1" , $content );
+			return $content;
 		}
 
 		public function wp_blockade_strip_data_tags($content) {
@@ -289,20 +304,8 @@ if( !class_exists('WP_Blockade') ) {
 			// bootstrap 3
 			$bootstrap = get_theme_support( 'bootstrap' );
 			$blockade  = get_theme_support( 'wp-blockade' );
-			if(
-				!$blockade &&
-				(
-					!$bootstrap ||
-					!(
-						isset( $bootstrap[0] ) &&
-						(
-							version_compare( $bootstrap[0], '3.0.0', '>=' ) &&
-							version_compare( $bootstrap[0], '4.0.0', '<' )
-						)
-					)
-				)
-			) {
-				wp_enqueue_style( 'wp-blockade-bootstrap', $this->plugin_dir_url . 'assets/css/wp-blockade-bootstrap.min.css', false, 'v3.3.7' );
+			if( !$blockade && !$bootstrap ) {
+				wp_enqueue_style( 'wp-blockade-bootstrap', $this->plugin_dir_url . 'assets/css/wp-blockade-bootstrap.v3.3.7.min.css', false, 'v3.3.7' );
 			}
 			wp_enqueue_style( 'wp-blockade-defaults', $this->plugin_dir_url . 'assets/css/wp-blockade-defaults.css', false );
 		}
@@ -311,6 +314,52 @@ if( !class_exists('WP_Blockade') ) {
 			$post_types = apply_filters( 'wp-blockade-override-post-types', $this->options['active_post_types'] );
 			$post_types = array_merge( $this->options['required_post_types'], $post_types );
 			return $post_types;
+		}
+
+		public function render_shortcode_preview() {
+			add_filter('show_admin_bar', '__return_false');
+			if( isset( $_GET['shortcode'] ) && $_GET['shortcode'] ) {
+				$shortcode = stripslashes( $_GET['shortcode'] );
+				$wrapping_classes = "";
+				if( isset( $_GET['classes'] ) && $_GET['classes'] ) {
+					$wrapping_classes = escape_attr( $_GET['classes'] );
+				}
+				$post_id = get_option('page_on_front');
+				if( isset( $_GET['post'] ) && $_GET['post'] ) {
+					$post_id = intval( $_GET['post'] );
+				}
+				$this->masquerade_as_post( $post_id );
+				?>
+				<!DOCTYPE html>
+				<html lang="en">
+					<head>
+						<meta charset="utf-8">
+						<meta http-equiv="X-UA-Compatible" content="IE=edge">
+						<meta name="viewport" content="width=device-width, initial-scale=1">
+						<?php wp_head(); ?>
+						<style>
+							#wpadminbar {
+								display: none;
+							}
+							html, body, body > .wp_blockade {
+								margin: 0 !important;
+								padding: 0 !important;
+								background-color: transparent !important;
+							}
+						</style>
+					</head>
+					<body <?php body_class('wp-blockade-shortcode-preview'); ?>>
+						<div class="wp_blockade">
+							<div class="<?php echo $wrapping_classes; ?>">
+								<?php echo do_shortcode( $shortcode ); ?>
+							</div>
+						</div>
+						<?php wp_footer(); ?>
+					</body>
+				</html>
+				<?php
+			}
+			die();
 		}
 
 		// Private Functions
@@ -443,6 +492,21 @@ if( !class_exists('WP_Blockade') ) {
 				}
 			}
 			return implode(',', $new_list);
+		}
+		// after running this, you are essentially on this post's page until the script exits;
+		private function masquerade_as_post( $post_id ) {
+			$post = get_post( $post_id );
+			if( $post ) {
+				$permalink = get_the_permalink( $post );
+				$_SERVER['PHP_SELF'   ] = '/'. trim( parse_url( home_url(), PHP_URL_PATH ), '/' ) . '/index.php';
+				$_SERVER['PATH_INFO'  ] = "";
+				$_SERVER['REQUEST_URI'] = '/'. trim( parse_url( $permalink, PHP_URL_PATH ), '/' );
+				global $wp, $wp_query, $wp_the_query;
+				$wp = $wp_query = $wp_the_query = null;
+				$wp_the_query = $wp_query = new WP_Query();
+				$wp = new WP();
+				wp();
+			}
 		}
 		// Private Static Functions ACCESSIBLE TO PUBLIC STATIC FUNCTIONS
 		private static function rglob($dir, $pattern, $flags = 0) {
