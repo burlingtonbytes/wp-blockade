@@ -3,7 +3,7 @@
 	Plugin URI: http://www.burlingtonbytes.com
 	Author: Burlington Bytes
 	Author URI: http://www.burlingtonbytes.com
-	Version: 0.9.2
+	Version: 0.9.3
 */
 tinymce.PluginManager.add('blockade_shortcode', function(editor, url) {
 	// kill if older than IE8
@@ -47,18 +47,19 @@ tinymce.PluginManager.add('blockade_shortcode', function(editor, url) {
 			return data;
 		},
 		render_html : function( data ) {
+			var shortcode = data.type_specific.shortcode.replace(/"/g, '&quot;');
 			var str = [
 				'<p>',
 					'<strong>NOTE:</strong> Blockade\'s live shortcode functionality ',
 					'currently only supports closed-form shortcodes. Adding a shortcode ',
 					'that wraps content will result in unexpected behavior.',
 				'</p>',
-				'<label><span>Shortcode: </span><input type="text" name="shortcode" class="mce-textbox" value="' + data.type_specific.shortcode + '"/></label>'
+				'<label><span>Shortcode: </span><input type="text" name="shortcode" class="mce-textbox" value="' + shortcode + '"/></label>'
 			].join('');
 			return str;
 		},
 		apply_form_results : function( data, form_data, block ) {
-			var shortcode = form_data.shortcode;
+			var shortcode = form_data.shortcode.replace(/&quot;/g, '"');
 			block.innerHTML ='';
 			var el = blockade.build_shortcode_iframe( shortcode, form_data.classes );
 			block.appendChild( el );

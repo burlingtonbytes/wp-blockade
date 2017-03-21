@@ -4,11 +4,11 @@
  * Slug: blockade_shortcode
  * Author: Greg Schoppe
  * Description: add shortcode blocks with live preview
- * Version: 0.9.2
+ * Version: 0.9.3
  */
  if( !class_exists('BlockadeShortcode') ) {
 	class BlockadeShortcode {
-		private $version = 'v0.9.2';
+		private $version = 'v0.9.3';
 		private static $_this;
 		private $addon_dir;
 		private $addon_dir_url;

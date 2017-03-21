@@ -5,7 +5,7 @@
  *	Author URI: http://www.burlingtonbytes.com
  *	Description: Blockade is the core plugin to the WPBlockade TinyMCE management suite.  It provides a simple visual pagebuilder within the TinyMCE Editor
  *	Editor Buttons: hideblockades,blockades
- *	Version: 0.9.2
+ *	Version: 0.9.3
 */
 tinymce.PluginManager.add('blockade', function(editor, url) {
 	// SECTION ---------------------------------------------------------- INITIALIZE

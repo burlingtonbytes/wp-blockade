@@ -4,7 +4,7 @@
  * Slug: map_block
  * Author: Greg Schoppe
  * Description: Insert a Google map as a block-level element
- * Version: 0.9.2
+ * Version: 0.9.3
  */
  if( !class_exists('BlockadeMapBlock') ) {
 	class BlockadeMapBlock {

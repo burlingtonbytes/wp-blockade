@@ -4,7 +4,7 @@
  * Slug: simple_columns
  * Author: Greg Schoppe
  * Description: Create Raw HTML elements, and incorporate container and editable areas directly
- * Version: 0.9.2
+ * Version: 0.9.3
  */
  if( !class_exists('BlockadeSimpleColumns') ) {
 	class BlockadeSimpleColumns {

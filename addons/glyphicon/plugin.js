@@ -3,7 +3,7 @@
 	Plugin URI: http://www.burlingtonbytes.com
 	Author: Burlington Bytes
 	Author URI: http://www.burlingtonbytes.com
-	Version: 0.9.2
+	Version: 0.9.3
 */
 tinymce.PluginManager.add('glyphicon_block', function(editor, url) {
 	// kill if older than IE8
@@ -14,6 +14,7 @@ tinymce.PluginManager.add('glyphicon_block', function(editor, url) {
 
 	// add custom css
 	editor.contentCSS.push(url+'/styles.css');
+	editor.contentCSS.push(url+'/tinymcestyles.css');
 	editor.on('init', function() {
 		var styleEl = editor.dom.create('link');
 		styleEl.setAttribute( 'rel' , 'stylesheet' );

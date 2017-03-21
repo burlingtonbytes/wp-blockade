@@ -4,11 +4,11 @@
  * Slug: blockade_sidebar
  * Author: Greg Schoppe
  * Description: create and embed widget areas
- * Version: 0.9.2
+ * Version: 0.9.3
  */
  if( !class_exists('BlockadeSidebar') ) {
 	class BlockadeSidebar {
-		private $version = 'v0.9.2';
+		private $version = 'v0.9.3';
 		private static $_this;
 		private $addon_dir;
 		private $addon_dir_url;

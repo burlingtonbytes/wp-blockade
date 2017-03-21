@@ -3,7 +3,7 @@
 	Plugin URI: http://www.burlingtonbytes.com
 	Author: Burlington Bytes
 	Author URI: http://www.burlingtonbytes.com
-	Version: 0.9.2
+	Version: 0.9.3
 */
 tinymce.PluginManager.add('simple_columns', function(editor, url) {
 	// kill if older than IE8
@@ -118,7 +118,7 @@ tinymce.PluginManager.add('simple_columns', function(editor, url) {
 			pull_prefix = 'pull-sm-';
 		}
 		if( typeof shifts === 'undefined' ) {
-			shifts = array();
+			shifts = [];
 			for( var i = 0; i < cols.length; i++ ) {
 				shifts.push(0);
 			}

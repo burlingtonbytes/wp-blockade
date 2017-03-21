@@ -86,6 +86,9 @@ simple drag and drop interface.
 
 == Changelog ==
 
+= 0.9.3 (03/20/2017) =
+* bug fixes in shortcode and column blocks
+
 = 0.9.2 (03/19/2017) =
 * Added Experimental Live Sidebar Block
 * Added Experimental Live Shortcode Block
