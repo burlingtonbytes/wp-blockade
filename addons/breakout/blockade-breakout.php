@@ -2,13 +2,13 @@
 /*
  * Block Name: Breakout
  * Slug: blockade_breakout
- * Author: Greg Schoppe
+ * Author: Burlington Bytes, LLC
  * Description: break out of the container to full width
- * Version: 0.9.3
+ * Version: 0.9.4
  */
  if( !class_exists('BlockadeBreakout') ) {
 	class BlockadeBreakout {
-		private $version = 'v0.9.3';
+		private $version = 'v0.9.4';
 		private static $_this;
 		private $addon_dir;
 		private $addon_dir_url;

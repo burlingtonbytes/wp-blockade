@@ -86,6 +86,11 @@ simple drag and drop interface.
 
 == Changelog ==
 
+= 0.9.4 (03/27/2017) =
+* Add Preview at Size opions for responsive editing
+* Fix Glyphicon Rendering in Bootstrap 4
+* Fix Bootstrap 3 columns getting bootstrap 4 classes
+
 = 0.9.3 (03/20/2017) =
 * bug fixes in shortcode and column blocks
 

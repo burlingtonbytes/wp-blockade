@@ -2,9 +2,9 @@
 /*
  * Block Name: Raw HTML
  * Slug: blockade_raw_html
- * Author: Greg Schoppe
+ * Author: Burlington Bytes, LLC
  * Description: Create Raw HTML elements, and incorporate container and editable areas directly
- * Version: 0.9.3
+ * Version: 0.9.4
  */
  if( !class_exists('BlockadeRawHTML') ) {
 	class BlockadeRawHTML {

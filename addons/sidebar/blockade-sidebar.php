@@ -2,13 +2,13 @@
 /*
  * Block Name: Sidebar
  * Slug: blockade_sidebar
- * Author: Greg Schoppe
+ * Author: Burlington Bytes, LLC
  * Description: create and embed widget areas
- * Version: 0.9.3
+ * Version: 0.9.4
  */
  if( !class_exists('BlockadeSidebar') ) {
 	class BlockadeSidebar {
-		private $version = 'v0.9.3';
+		private $version = 'v0.9.4';
 		private static $_this;
 		private $addon_dir;
 		private $addon_dir_url;

@@ -3,7 +3,7 @@
 	Plugin URI: http://www.burlingtonbytes.com
 	Author: Burlington Bytes
 	Author URI: http://www.burlingtonbytes.com
-	Version: 0.9.3
+	Version: 0.9.4
 */
 tinymce.PluginManager.add('simple_columns', function(editor, url) {
 	// kill if older than IE8
@@ -13,7 +13,7 @@ tinymce.PluginManager.add('simple_columns', function(editor, url) {
 	if(!blockade) { return; }
 	var bootstrap_version = '3';
 	if( typeof editor.settings.wp_blockade_bootstrap_major_version !== 'undefined' && editor.settings.wp_blockade_bootstrap_major_version ) {
-		bootstrap_version = '4';
+		bootstrap_version = editor.settings.wp_blockade_bootstrap_major_version;
 	}
 
 	// add menu item to main blockade menu

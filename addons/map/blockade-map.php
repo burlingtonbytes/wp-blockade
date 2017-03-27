@@ -2,9 +2,9 @@
 /*
  * Block Name: Map Block
  * Slug: map_block
- * Author: Greg Schoppe
+ * Author: Burlington Bytes, LLC
  * Description: Insert a Google map as a block-level element
- * Version: 0.9.3
+ * Version: 0.9.4
  */
  if( !class_exists('BlockadeMapBlock') ) {
 	class BlockadeMapBlock {

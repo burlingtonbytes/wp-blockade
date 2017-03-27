@@ -2,9 +2,9 @@
 /*
  * Block Name: Image Block
  * Slug: image_block
- * Author: Greg Schoppe
+ * Author: Burlington Bytes, LLC
  * Description: Insert images directly as block-level elements
- * Version: 0.9.3
+ * Version: 0.9.4
  */
  if( !class_exists('BlockadeImageBlock') ) {
 	class BlockadeImageBlock {

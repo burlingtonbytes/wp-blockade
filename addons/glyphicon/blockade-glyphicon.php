@@ -2,9 +2,9 @@
 /*
  * Block Name: Glyphicon Block
  * Slug: glyphicon_block
- * Author: Greg Schoppe
+ * Author: Burlington Bytes, LLC
  * Description: Insert glyphicons directly as block-level elements
- * Version: 0.9.3
+ * Version: 0.9.4
  */
  if( !class_exists('BlockadeGlyphiconBlock') ) {
 	class BlockadeGlyphiconBlock {
@@ -33,6 +33,7 @@
 			return $plugins;
 		}
 		public function enqueue_styles() {
+			wp_enqueue_style( 'glyphicon-halflings', $this->addon_dir_url . 'font/glyphicons-halflings.css' );
 			wp_enqueue_style( 'wp-blockade-glyphicon-styles', $this->addon_dir_url . 'styles.css' );
 		}
 		/*

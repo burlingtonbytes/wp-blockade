@@ -2,13 +2,13 @@
 /*
  * Block Name: Shortcode
  * Slug: blockade_shortcode
- * Author: Greg Schoppe
+ * Author: Burlington Bytes, LLC
  * Description: add shortcode blocks with live preview
- * Version: 0.9.3
+ * Version: 0.9.4
  */
  if( !class_exists('BlockadeShortcode') ) {
 	class BlockadeShortcode {
-		private $version = 'v0.9.3';
+		private $version = 'v0.9.4';
 		private static $_this;
 		private $addon_dir;
 		private $addon_dir_url;

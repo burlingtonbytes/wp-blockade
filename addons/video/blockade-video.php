@@ -2,9 +2,9 @@
 /*
  * Block Name: Video Block
  * Slug: video_block
- * Author: Greg Schoppe
+ * Author: Burlington Bytes, LLC
  * Description: Insert YouTube and Vimeo videos directly as block-level elements
- * Version: 0.9.3
+ * Version: 0.9.4
  */
  if( !class_exists('BlockadeVideoBlock') ) {
 	class BlockadeVideoBlock {

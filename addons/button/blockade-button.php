@@ -2,9 +2,9 @@
 /*
  * Block Name: Button Block
  * Slug: button_block
- * Author: Greg Schoppe
+ * Author: Burlington Bytes, LLC
  * Description: Insert Bootstrap buttons as block-level elements
- * Version: 0.9.3
+ * Version: 0.9.4
  */
  if( !class_exists('BlockadeButtonBlock') ) {
 	class BlockadeButtonBlock {
