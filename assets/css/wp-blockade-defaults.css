@@ -2,3 +2,4 @@
 .wp-blockade > img.imageblock,
 .wp-blockade > a > img.imageblock { display: block; margin: 0 auto; max-width: 100%; height: auto; }
 .wp-blockade dl.row > dt { clear: left; }
+.wp-blockade > a.blocklink { display: block; }

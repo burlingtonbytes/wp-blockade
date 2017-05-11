@@ -3,7 +3,7 @@
 	Plugin URI: http://www.burlingtonbytes.com
 	Author: Burlington Bytes
 	Author URI: http://www.burlingtonbytes.com
-	Version: 0.9.4
+	Version: 0.9.5
 */
 tinymce.PluginManager.add('blockade_sidebar', function(editor, url) {
 	// kill if older than IE8
@@ -11,7 +11,6 @@ tinymce.PluginManager.add('blockade_sidebar', function(editor, url) {
 	// load blockade object
 	var blockade = editor.plugins.blockade;
 	if(!blockade) { return; }
-
 	// add menu item to main blockade menu
 	var menu_item = {
 		text: 'Widget Area',
@@ -20,7 +19,7 @@ tinymce.PluginManager.add('blockade_sidebar', function(editor, url) {
 				var el = blockade.document.createElement('div');
 				var shortcode = "[wp_blockade_sidebar slug=\"\"]";
 				el.appendChild( blockade.build_shortcode_iframe( shortcode ) );
-				el.innerHTML += '<!--' + blockade.classes.shortcode + '::' + shortcode + '-->'
+				el.innerHTML += '<!--' + blockade.classes.shortcode + '::' + shortcode + '-->';
 				blockade.setData(el, blockade.datafields.type, 'sidebar');
 				el = blockade.convertToBlock(el);
 				blockade.placeBlock(el);
@@ -30,7 +29,6 @@ tinymce.PluginManager.add('blockade_sidebar', function(editor, url) {
 		}
 	};
 	blockade.addToMenu( menu_item, 'Dynamic Blocks' );
-
 	// register edit function
 	blockade.contenttypes.sidebar = {
 		name : "Widget Area",

@@ -5,7 +5,7 @@
  *	Author URI: http://www.burlingtonbytes.com
  *	Description: Blockade is the core plugin to the WPBlockade TinyMCE management suite.  It provides a simple visual pagebuilder within the TinyMCE Editor
  *	Editor Buttons: hideblockades,blockades
- *	Version: 0.9.4
+ *	Version: 0.9.5
 */
 tinymce.PluginManager.add('blockade', function(editor, url) {
 	// SECTION ---------------------------------------------------------- INITIALIZE
@@ -651,6 +651,13 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 			}
 		}
 		data.unknown.styles = temp;
+		data.link = [];
+		data.link.href = block.getAttribute('data-' + self.idbase + '-href');
+		var target = block.getAttribute('data-' + self.idbase + '-target');
+		data.link.new_win = false;
+		if(target == '_blank') {
+			data.link.new_win = true;
+		}
 		if( type_options.parse_block_data ) {
 			data = type_options.parse_block_data( data, block );
 		}
@@ -709,6 +716,14 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		if( styles ) {
 			styles += ';';
 		}
+		var checked = '';
+		if( data.link.new_win ) {
+			checked = ' checked="checked"';
+		}
+		var href = '';
+		if(data.link.href) {
+			href = data.link.href;
+		}
 		var tabs = {
 			'Spacing' : [
 				'<div class="blockade-options-one-half">',
@@ -734,6 +749,16 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 					}, data.background.style ),
 				'</div>',
 			].join(""),
+			"Link" : [
+				'<label>',
+					'<span>URL: </span>',
+					'<input type="text" name="link_href" class="mce-textbox" value="' + href + '"/>',
+				'</label>',
+				'<label>',
+					'<input type="checkbox" name="link_newwin" value="1"' + checked + '>',
+					' open in new window?',
+				'</label>'
+			].join(''),
 			"Custom" : [
 				'<label><span>Custom Classes: </span><input type="text" name="classes" class="mce-textbox" value="' + data.unknown.classes.join(' ') + '"/></label>',
 				'<label><span>Custom Styles: </span><input type="text" name="styles" class="mce-textbox" value="' + styles + '"/></label>',
@@ -843,7 +868,16 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 			}
 		}
 		styles = bg_str + styles;
-
+		if( form_data['link_href'] ) {
+			el.setAttribute('data-' + self.idbase + '-href', form_data['link_href']);
+		} else {
+			el.removeAttribute('data-' + self.idbase + '-href');
+		}
+		if( form_data['link_newwin'] ) {
+			el.setAttribute('data-' + self.idbase + '-target', '_blank');
+		} else {
+			el.removeAttribute('data-' + self.idbase + '-target');
+		}
 		el.setAttribute('class', classes);
 		el.setAttribute('style', styles);
 		el.setAttribute('data-mce-style', styles);
@@ -891,6 +925,8 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		document.body.addEventListener('click', function(e){
 			if( e.target ) {
 				if( hasClass( e.target, "blockade-options-tab" ) && !hasClass( e.target, "active" ) ) {
+					e.preventDefault();
+					e.stopPropagation();
 					var parent = e.target.parentElement;
 					if( hasClass( parent, 'blockade-options-tab-headers' ) ) {
 						var el = e.target;
@@ -1109,6 +1145,26 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 				}
 			}
 		});
+		// insert blocklinks on save
+		editor.serializer.addAttributeFilter('data-' + self.idbase + '-href', function(nodes, name) {
+			for (var i = 0; i < nodes.length; i++) {
+				var node    = nodes[i];
+				var href    = node.attr('data-' + self.idbase +'-href');
+				var target  = node.attr('data-' + self.idbase +'-target');
+				if( !target ) {
+					node.attr('data-' + self.idbase +'-target', null);
+				}
+				if( !href ) {
+					node.attr('data-' + self.idbase +'-href', null);
+					continue;
+				}
+				var newnode = new tinymce.html.Node('a', 1);
+				newnode.attr('class', self.idbase + '-blocklink');
+				newnode.attr('href', href);
+				newnode.attr('target', target);
+				node.wrap(newnode);
+			}
+		});
 		editor.serializer.addAttributeFilter('contenteditable', function(nodes, name) {
 			for (var i = 0; i < nodes.length; i++) {
 				var node = nodes[i];
@@ -1134,6 +1190,16 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 			self.body.innerHTML = '';
 			var block = createBlock( content );
 			self.body.appendChild(block);
+		}
+		// kill the blocklink elements we inserted on save
+		var blocklinks = selectChildrenByClass(self.body, self.idbase + '-blocklink');
+		for (var i=0; i < blocklinks.length; i++) {
+			var el = blocklinks[i];
+			var parent = el.parentNode;
+			while (el.firstChild) {
+				parent.insertBefore(el.firstChild, el);
+			}
+			parent.removeChild(el);
 		}
 		var blocks = selectChildrenByClass(self.body, self.classes.blockade);
 		blocks.reverse(); // reverse array so inside is processed first

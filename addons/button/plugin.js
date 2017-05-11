@@ -3,7 +3,7 @@
 	Plugin URI: http://www.burlingtonbytes.com
 	Author: Burlington Bytes
 	Author URI: http://www.burlingtonbytes.com
-	Version: 0.9.4
+	Version: 0.9.5
 */
 tinymce.PluginManager.add('button_block', function(editor, url) {
 	// kill if older than IE8
@@ -1182,7 +1182,7 @@ tinymce.PluginManager.add('button_block', function(editor, url) {
 			}
 			return data;
 		},
-		render_html : function( data ) {
+		render_options : function( data ) {
 			var win_checked = '';
 			if( data.type_specific.new_win ) {
 				win_checked = ' checked="checked"';
@@ -1240,7 +1240,10 @@ tinymce.PluginManager.add('button_block', function(editor, url) {
 					].join('')),
 				'</div>',
 			].join('');
-			return str;
+			return {
+				'Button' : str,
+				'Link': false
+			};
 		},
 		apply_form_results : function( data, form_data, block ) {
 			var content = '<span class="button_text">' + form_data.text + '</span>';

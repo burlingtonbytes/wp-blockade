@@ -3,7 +3,7 @@
 	Plugin URI: http://www.burlingtonbytes.com
 	Author: Burlington Bytes
 	Author URI: http://www.burlingtonbytes.com
-	Version: 0.9.4
+	Version: 0.9.5
 */
 tinymce.PluginManager.add('image_block', function(editor, url) {
 	// kill if older than IE8
@@ -44,13 +44,9 @@ tinymce.PluginManager.add('image_block', function(editor, url) {
 				height  : '',
 				id      : 0
 			};
-			data.type_specific.link = {
-				href    : "",
-				new_win : false
-			};
 			var img_elem = block.querySelector('img.imageblock');
 			data.type_specific.image.url     = img_elem.getAttribute('src'   );
-			data.type_specific.image.caption = img_elem.getAttribute('alt'   );
+			data.type_specific.image.alt     = img_elem.getAttribute('alt'   );
 			data.type_specific.image.title   = img_elem.getAttribute('title' );
 			data.type_specific.image.width   = img_elem.getAttribute('width' );
 			data.type_specific.image.height  = img_elem.getAttribute('height');
@@ -66,37 +62,12 @@ tinymce.PluginManager.add('image_block', function(editor, url) {
 					}
 				}
 			}
-
-			var link_elem = block.querySelector('a.blocklink');
-			if( link_elem ) {
-				data.type_specific.link.href = link_elem.getAttribute('href');
-				var target = link_elem.getAttribute('target');
-				if( target ) {
-					data.type_specific.link.new_win = true;
-				} else {
-					data.type_specific.link.new_win = false;
-				}
-			}
 			return data;
 		},
 		render_html : function( data ) {
 			var image_str = JSON.stringify( data.type_specific.image );
-			var checked = '';
-			if( data.type_specific.link.new_win ) {
-				checked = ' checked="checked"';
-			}
 			var str = [
-				blockade.options_make_image_uploader_html("", 'main_image', image_str ),
-				blockade.options_make_accordion_html("Link", [
-					'<label>',
-						'<span>Address: </span>',
-						'<input type="text" name="href" class="mce-textbox" value="' + data.type_specific.link.href + '"/>',
-					'</label>',
-					'<label>',
-						'<input type="checkbox" name="newwin" value="true"' + checked + '/>',
-						' open link in new window?',
-					'</label>',
-				].join('')),
+				blockade.options_make_image_uploader_html("", 'main_image', image_str )
 			].join('');
 			return str;
 		},
@@ -111,26 +82,21 @@ tinymce.PluginManager.add('image_block', function(editor, url) {
 						image = attachmentData.sizes[size];
 					}
 				}
-
+				var alt = attachmentData.alt;
+				if( !alt ) {
+					alt = attachmentData.caption;
+				}
 				var image = [
 					'<img',
 					' src="' + image.url + '"',
-					' alt="' + attachmentData.caption + '"',
+					' alt="' + attachmentData.alt + '"',
 					' title="' + attachmentData.title + '"',
 					' width="' + image.width + '"',
 					' height="' + image.height + '"',
 					' class="imageblock size-' + size + ' wp-image-' + attachmentData.id + '"',
 					'>'
 				].join('');
-				var content = image;
-				if( form_data.href ) {
-					content = '<a href="' + form_data.href + '" class="blocklink"';
-					if( form_data.newwin ) {
-						content += ' target="_blank"';
-					}
-					content += '>' + image + "</a>";
-				}
-				block.innerHTML = content;
+				block.innerHTML = image;
 			}
 		}
 	};

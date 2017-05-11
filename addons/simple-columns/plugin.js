@@ -3,7 +3,7 @@
 	Plugin URI: http://www.burlingtonbytes.com
 	Author: Burlington Bytes
 	Author URI: http://www.burlingtonbytes.com
-	Version: 0.9.4
+	Version: 0.9.5
 */
 tinymce.PluginManager.add('simple_columns', function(editor, url) {
 	// kill if older than IE8

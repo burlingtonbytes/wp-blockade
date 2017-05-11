@@ -13,8 +13,6 @@ For usage directions, visit https://www.wpblockade.com/documentation.
 3. Commit your changes: `git commit -am 'Add some feature'`
 4. Push to the branch: `git push origin my-new-feature`
 5. Submit a pull request :D
-## History
-* v0.9.0 BETA - Initial public release
 ## Credits
 Created by Burlington Bytes, a full service digital marketing company in Burlington, VT.
 ## License

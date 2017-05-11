@@ -4,11 +4,11 @@
  * Slug: blockade_breakout
  * Author: Burlington Bytes, LLC
  * Description: break out of the container to full width
- * Version: 0.9.4
+ * Version: 0.9.5
  */
  if( !class_exists('BlockadeBreakout') ) {
 	class BlockadeBreakout {
-		private $version = 'v0.9.4';
+		private $version = 'v0.9.5';
 		private static $_this;
 		private $addon_dir;
 		private $addon_dir_url;
@@ -36,7 +36,7 @@
 		}
 
 		public function register_tinymce_plugin( $plugins ) {
-			$plugins['blockade_breakout'] = $this->addon_dir_url . 'plugin.js';
+			$plugins['blockade_breakout'] = $this->addon_dir_url . 'plugin.js?v=' . $this->version;
 			return $plugins;
 		}
 	}

@@ -4,10 +4,11 @@
  * Slug: image_block
  * Author: Burlington Bytes, LLC
  * Description: Insert images directly as block-level elements
- * Version: 0.9.4
+ * Version: 0.9.5
  */
  if( !class_exists('BlockadeImageBlock') ) {
 	class BlockadeImageBlock {
+		private $version = 'v0.9.5';
 		private static $_this;
 		private $addon_dir;
 		private $addon_dir_url;
@@ -28,7 +29,7 @@
 		}
 		// PUBLIC FUNCTIONS
 		public function register_tinymce_plugin( $plugins ) {
-			$plugins['image_block'] = $this->addon_dir_url . 'plugin.js';
+			$plugins['image_block'] = $this->addon_dir_url . 'plugin.js?v=' . $this->version;
 			return $plugins;
 		}
 
