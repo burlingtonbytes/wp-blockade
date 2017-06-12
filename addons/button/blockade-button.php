@@ -4,11 +4,9 @@
  * Slug: button_block
  * Author: Burlington Bytes, LLC
  * Description: Insert Bootstrap buttons as block-level elements
- * Version: 0.9.5
  */
  if( !class_exists('BlockadeButtonBlock') ) {
 	class BlockadeButtonBlock {
-		private $version = 'v0.9.5';
 		private static $_this;
 		private $addon_dir;
 		private $addon_dir_url;
@@ -28,7 +26,7 @@
 		}
 		// PUBLIC FUNCTIONS
 		public function register_tinymce_plugin( $plugins ) {
-			$plugins['button_block'] = $this->addon_dir_url . 'plugin.js?v=' . $this->version;
+			$plugins['button_block'] = $this->addon_dir_url . 'plugin.js?v=' . WP_Blockade::$version;
 			return $plugins;
 		}
 	}

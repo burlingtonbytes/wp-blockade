@@ -4,11 +4,9 @@
  * Slug: blockade_breakout
  * Author: Burlington Bytes, LLC
  * Description: break out of the container to full width
- * Version: 0.9.5
  */
  if( !class_exists('BlockadeBreakout') ) {
 	class BlockadeBreakout {
-		private $version = 'v0.9.5';
 		private static $_this;
 		private $addon_dir;
 		private $addon_dir_url;
@@ -32,11 +30,11 @@
 		// PUBLIC FUNCTIONS
 		public function enqueue_styles_and_scripts() {
 			wp_enqueue_script( 'jquery' );
-			wp_enqueue_script( 'blockade-breakout', $this->addon_dir_url . 'blockade-breakout.js', array('jquery'), $this->version );
+			wp_enqueue_script( 'blockade-breakout', $this->addon_dir_url . 'blockade-breakout.js', array('jquery'), WP_Blockade::$version );
 		}
 
 		public function register_tinymce_plugin( $plugins ) {
-			$plugins['blockade_breakout'] = $this->addon_dir_url . 'plugin.js?v=' . $this->version;
+			$plugins['blockade_breakout'] = $this->addon_dir_url . 'plugin.js?v=' . WP_Blockade::$version;
 			return $plugins;
 		}
 	}

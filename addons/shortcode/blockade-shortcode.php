@@ -4,11 +4,9 @@
  * Slug: blockade_shortcode
  * Author: Burlington Bytes, LLC
  * Description: add shortcode blocks with live preview
- * Version: 0.9.5
  */
  if( !class_exists('BlockadeShortcode') ) {
 	class BlockadeShortcode {
-		private $version = 'v0.9.5';
 		private static $_this;
 		private $addon_dir;
 		private $addon_dir_url;
@@ -29,7 +27,7 @@
 		}
 		// PUBLIC FUNCTIONS
 		public function register_tinymce_plugin( $plugins ) {
-			$plugins['blockade_shortcode'] = $this->addon_dir_url . 'plugin.js?v=' . $this->version;
+			$plugins['blockade_shortcode'] = $this->addon_dir_url . 'plugin.js?v=' . WP_Blockade::$version;
 			return $plugins;
 		}
 	}

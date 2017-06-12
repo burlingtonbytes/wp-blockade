@@ -86,6 +86,10 @@ simple drag and drop interface.
 
 == Changelog ==
 
+= 0.9.6 (06/12/2017) =
+* Many fixes to block-level links
+* Restore List Controls after 4.7 enforces using the lists TinyMCE plugin
+
 = 0.9.5 (05/10/2017) =
 * Fix Bootstrap 3 columns getting bootstrap 4 classes (continued)
 * Fix WP-CLI warning

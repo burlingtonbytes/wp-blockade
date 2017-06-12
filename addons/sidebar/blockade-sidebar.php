@@ -4,11 +4,9 @@
  * Slug: blockade_sidebar
  * Author: Burlington Bytes, LLC
  * Description: create and embed widget areas
- * Version: 0.9.5
  */
  if( !class_exists('BlockadeSidebar') ) {
 	class BlockadeSidebar {
-		private $version = 'v0.9.5';
 		private static $_this;
 		private $addon_dir;
 		private $addon_dir_url;
@@ -31,7 +29,7 @@
 		}
 		// PUBLIC FUNCTIONS
 		public function register_tinymce_plugin( $plugins ) {
-			$plugins['blockade_sidebar'] = $this->addon_dir_url . 'plugin.js?v=' . $this->version;
+			$plugins['blockade_sidebar'] = $this->addon_dir_url . 'plugin.js?v=' . WP_Blockade::$version;
 			return $plugins;
 		}
 		public function list_sidebars() {

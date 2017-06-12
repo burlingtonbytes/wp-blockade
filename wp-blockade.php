@@ -5,11 +5,11 @@
  * Author: Burlington Bytes
  * Author URI: https://www.burlingtonbytes.com
  * Description: Lightweight and intuitive Visual Editor for Designers, Developers, and End Users.
- * Version: 0.9.5
+ * Version: 0.9.6
  */
 if( !class_exists('WP_Blockade') ) {
 	class WP_Blockade {
-		private $version = 'v0.9.5';
+		public static $version = 'v0.9.6';
 		private static $_this;
 		private $plugin_dir;
 		private $plugin_dir_url;
@@ -19,6 +19,7 @@ if( !class_exists('WP_Blockade') ) {
 		private $default_opts = array(
 			'editors' => array(),
 			'required_plugins' => array(
+				'blockade_lists'      => "{{PLUGIN_DIR}}core-plugins/lists/plugin.js?v={{VERSION}}",
 				'blockade'            => "{{PLUGIN_DIR}}core-plugins/blockade/plugin.js?v={{VERSION}}",
 			),
 			'required_buttons' => array(
@@ -231,6 +232,7 @@ if( !class_exists('WP_Blockade') ) {
 				$tinymce_options['wp_blockade_framework_css'] = apply_filters( 'wp-blockade-framework-css', $framework_css );
 				// remove offending plugins
 				$tinymce_options['plugins'                ] = $this->blockade_modify_csl( $tinymce_options['plugins'], null, $this->options['bad_plugins'] );
+				$tinymce_options['fix_list_elements'] = false;
 				// fix the &nbsp; issue
 				$tinymce_options['entities'               ] = '160,nbsp,38,amp,60,lt,62,gt';
 				$tinymce_options['entity_encoding'        ] = 'named';
@@ -246,7 +248,6 @@ if( !class_exists('WP_Blockade') ) {
 				$tinymce_options['wpautop'                ] = false;
 				$tinymce_options['remove_linebreaks'      ] = false;
 				$tinymce_options['apply_source_formatting'] = true;
-				$tinymce_options['forced_root_block'      ] = '';
 			}
 			// explicitly set variable so non-blockade tinymce's dont accidentally inherit it
 			if(!isset($tinymce_options['external_plugins']) || !$tinymce_options['external_plugins']) {
@@ -472,7 +473,7 @@ if( !class_exists('WP_Blockade') ) {
 						get_template_directory_uri(),
 						get_stylesheet_directory_uri(),
 						get_stylesheet_directory_uri(),
-						$this->version
+						WP_Blockade::$version
 					);
 					$path = apply_filters( 'wp-blockade-parse-path', $path );
 					$path = str_replace( $find, $replace, $path );

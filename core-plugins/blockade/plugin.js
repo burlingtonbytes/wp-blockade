@@ -3,9 +3,8 @@
  *	Plugin URI: http://www.burlingtonbytes.com
  *	Author: Burlington Bytes
  *	Author URI: http://www.burlingtonbytes.com
- *	Description: Blockade is the core plugin to the WPBlockade TinyMCE management suite.  It provides a simple visual pagebuilder within the TinyMCE Editor
+ *	Description: Blockade is the core plugin to the WP_Blockade TinyMCE management suite.  It provides a simple visual pagebuilder within the TinyMCE Editor
  *	Editor Buttons: hideblockades,blockades
- *	Version: 0.9.5
 */
 tinymce.PluginManager.add('blockade', function(editor, url) {
 	// SECTION ---------------------------------------------------------- INITIALIZE
@@ -1174,6 +1173,23 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 	});
 
 	// filter the input
+	editor.on('BeforeSetContent', function(e) {
+		var content = e.content;
+		var tempDiv = document.createElement('DIV');
+		tempDiv.innerHTML = content;
+		// kill the blocklink elements we inserted on save
+		var blocklinks = selectChildrenByClass(tempDiv, self.idbase + '-blocklink');
+		for (var i=0; i < blocklinks.length; i++) {
+			var el = blocklinks[i];
+			var parent = el.parentNode;
+			while (el.firstChild) {
+				parent.insertBefore(el.firstChild, el);
+			}
+			parent.removeChild(el);
+		}
+		content = tempDiv.innerHTML;
+		e.content = content;
+	});
 	editor.on('SetContent', function(e) {
 		if(!self.body) {
 			self.body     = editor.getBody();
@@ -1191,16 +1207,7 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 			var block = createBlock( content );
 			self.body.appendChild(block);
 		}
-		// kill the blocklink elements we inserted on save
-		var blocklinks = selectChildrenByClass(self.body, self.idbase + '-blocklink');
-		for (var i=0; i < blocklinks.length; i++) {
-			var el = blocklinks[i];
-			var parent = el.parentNode;
-			while (el.firstChild) {
-				parent.insertBefore(el.firstChild, el);
-			}
-			parent.removeChild(el);
-		}
+
 		var blocks = selectChildrenByClass(self.body, self.classes.blockade);
 		blocks.reverse(); // reverse array so inside is processed first
 		for (var i=0; i < blocks.length; i++) {
@@ -1418,10 +1425,15 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 				el.parentNode.replaceChild(wrapper, el);
 				el = clone;
 			}
+			var cursorTarget = false;
+			if(isEmptyish(el)) {
+				el.innerHTML='<p><br data-mce-bogus="1"></p>';
+				cursorTarget = el.firstChild;
+			}
 			el.setAttribute("contentEditable", "true");
 			el.focus();
-			if(el.innerHTML=="&nbsp;") {
-				el.innerHTML="";
+			if(cursorTarget) {
+				editor.selection.setCursorLocation( cursorTarget );
 			}
 			var blockParents = editor.dom.getParents(el, '.'+self.classes.wrapper);
 			if(blockParents[0]) {
@@ -1435,7 +1447,7 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		if(editareaElements) {
 			for (var i=0; i < editareaElements.length; i++) {
 				editareaElements[i].removeAttribute("contentEditable");
-				if(editareaElements[i].innerHTML=="") {
+				if(isEmptyish(editareaElements[i])) {
 					editareaElements[i].innerHTML="&nbsp;";
 				}
 				if(hasClass(editareaElements[i].parentNode, self.classes.editwrapper)) {

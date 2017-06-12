@@ -4,11 +4,9 @@
  * Slug: blockade_raw_html
  * Author: Burlington Bytes, LLC
  * Description: Create Raw HTML elements, and incorporate container and editable areas directly
- * Version: 0.9.5
  */
  if( !class_exists('BlockadeRawHTML') ) {
 	class BlockadeRawHTML {
-		private $version = 'v0.9.5';
 		private static $_this;
 		private $addon_dir;
 		private $addon_dir_url;
@@ -29,7 +27,7 @@
 		}
 		// PUBLIC FUNCTIONS
 		public function register_tinymce_plugin( $plugins ) {
-			$plugins['blockade_raw_html'] = $this->addon_dir_url . 'plugin.js?v=' . $this->version;
+			$plugins['blockade_raw_html'] = $this->addon_dir_url . 'plugin.js?v=' . WP_Blockade::$version;
 			return $plugins;
 		}
 
