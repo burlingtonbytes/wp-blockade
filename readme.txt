@@ -3,7 +3,7 @@ Contributors: burlingtonbytes
 Donate link: https://www.wpblockade.com
 Tags: page builder, visual composer, WYSIWYG, editor, columns, embed, formatting, home page builder, template builder, layout builder, landing page builder, website builder, site builder, front-end builder, drag and drop builder, editor, front-end editor, page layout, visual builder
 Requires at least: 4.0
-Tested up to: 4.7
+Tested up to: 4.9
 Stable tag: trunk
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -85,6 +85,13 @@ simple drag and drop interface.
 3. You can even live preview your page, without ever leaving the WordPress editor
 
 == Changelog ==
+
+= 0.9.7 (10/27/2017) =
+* Fix to buttons without an icon
+* Fix for missing widgets block
+* Many style improvements
+* Fix for cut/paste issues
+* New border controls on all blocks
 
 = 0.9.6 (06/12/2017) =
 * Many fixes to block-level links

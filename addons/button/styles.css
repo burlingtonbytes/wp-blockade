@@ -1,3 +1,6 @@
+.wp-blockade-button-wrapper {
+	pointer-events: none;
+}
 .wp-blockade .wp-blockade-glyphicon-wrapper {
 	display: block;
 	color: inherit;

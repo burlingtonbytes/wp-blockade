@@ -1,11 +1,10 @@
 .blockade-options {
 	position: relative;
 	margin: -20px;
-	border-bottom: 1px solid #ccc;
-	height: 408px;
 	overflow: auto;
 	max-height: 80vh;
-	padding: 5px;
+	padding: 16px;
+	height: 386px;
 }
 .blockade-options * {
 	white-space: normal;
@@ -13,22 +12,27 @@
 .blockade-options strong {
 	font-weight: bold;
 }
+.blockade-options p {
+	margin-bottom: 10px;
+}
 ul.blockade-options-tab-headers {
-	border-bottom: 1px solid #ccc;
-	padding: 5px 5px 0;
+	border-bottom: 1px solid #ddd;
+	padding: 5px 16px 0;
 	text-align: right;
 	background-color: #fcfcfc;
-	margin: -5px -5px 5px -5px;
+	margin: -16px -16px 16px -16px;
 }
 ul.blockade-options-tab-headers li.blockade-options-tab {
 	display: inline-block;
 	padding: 2px 10px;
-	border: 1px solid #ccc;
-	border-radius: 5px 5px 0 0;
+	border: 1px solid #ddd;
+	border-radius: 3px 3px 0 0;
+	margin-right: -1px;
 	background-color: #eee;
 	vertical-align: bottom;
 	margin-bottom: -1px;
 	cursor: pointer;
+	box-shadow: inset 0 -10px 2px -10px rgba(0, 0, 0, 0.1);
 	/* kill select */
 	-moz-user-select: none;
 	-ms-user-select: none;
@@ -43,6 +47,7 @@ ul.blockade-options-tab-headers li.blockade-options-tab.active {
 	background-color: #fff;
 	border-bottom: 1px solid #fff;
 	padding: 8px 10px 2px;
+	box-shadow: none;
 }
 ul.blockade-options-tab-contents li.blockade-options-tab {
 	display: none;
@@ -74,6 +79,7 @@ ul.blockade-options-tab-contents li.blockade-options-tab.active {
 }
 .blockade-options h3 {
 	text-align: center;
+	margin-bottom: 10px;
 }
 .blockade-options hr {
 	display: block;
@@ -207,6 +213,7 @@ ul.blockade-options-tab-contents li.blockade-options-tab.active {
 .blockade-options-image-wrapper .blockade-options-image-inner-wrapper .blockade-options-image-preview {
 	height: 150px;
 	border: 1px solid #ddd;
+	margin-bottom: 12px;
 }
 .blockade-options-image-wrapper .blockade-options-image-inner-wrapper .blockade-options-image-preview img {
 	display: block;
@@ -265,4 +272,23 @@ ul.blockade-options-tab-contents li.blockade-options-tab.active {
 	margin-top: 3px;
 	padding: 0;
 	border: 1px solid #ccc;
+}
+.blockade-options table.blockade-table {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	border-collapse: collapse;
+	width: 100%;
+}
+.blockade-options table.blockade-table > tbody > tr > td,
+.blockade-options table.blockade-table > thead > tr > th {
+	vertical-align: middle;
+	padding: 5px;
+	border-bottom: 1px solid #dddddd;
+}
+.blockade-options table.blockade-table > tbody > tr:last-child td {
+	border: none;
+}
+.blockade-options table.blockade-table > tbody > tr > td input,
+.blockade-options table.blockade-table > tbody > tr > td select {
+	margin: 0;
 }

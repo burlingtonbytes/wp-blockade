@@ -1060,7 +1060,7 @@ tinymce.PluginManager.add('button_block', function(editor, url) {
 		}
 	];
 	var glyphicon_select = {
-		' ' : "No Icon"
+		'' : "No Icon"
 	};
 	for( var i = 0; i < glyphicons.length; i++ ) {
 		glyphicon_select[glyphicons[i].id] = "&#x" + glyphicons[i].unicode + ";" + " " + glyphicons[i].id.replace("glyphicon-", "");

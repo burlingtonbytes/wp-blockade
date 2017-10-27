@@ -304,6 +304,38 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		self.document   = self.editor.getDoc();
 		self.wrapInUndo = self.editor.undoManager.transact;
 	});
+	// If pasting in blockade content, remove the blockade classes.
+	tinymce.activeEditor.on('PastePreProcess', function (e) {
+		var temp_node = document.createElement('DIV');
+		temp_node.innerHTML = e.content;
+		temp_node = unwrap_content(temp_node);
+		var paste = temp_node.innerHTML;
+		e.content = paste;
+		document.getElementById('content_ifr').contentWindow.document.getElementById('tinymce').setAttribute('data-dirty', 'true');
+	});
+	// If content is changed, check we need to clean it.
+	tinymce.activeEditor.on('change', function (e) {
+		var mce = document.getElementById('content_ifr').contentWindow.document.getElementById('tinymce');
+		if (mce.hasAttribute('data-dirty') && mce.getAttribute('data-dirty') === 'true') {
+			self.editor.setContent(self.editor.getContent());
+			mce.setAttribute('data-dirty', 'false');
+		}
+	});
+	function unwrap_content(node) {
+		var divs = node.querySelectorAll('div');
+		for (var i = divs.length - 1; i >= 0; i--) {
+			divs[i].outerHTML = divs[i].innerHTML;
+		}
+		// var ps = node.querySelectorAll('p');
+		// for (var i = ps.length - 1; i >= 0; i--) {
+		// 	ps[i].outerHTML = ps[i].innerHTML;
+		// }
+		var meta = node.querySelectorAll('meta');
+		for (var i = 0; i < meta.length; i++) {
+			meta[i].remove();
+		}
+		return node;
+	}
 
 	// SECTION ---------------------------------------------------------------- BUTTONS
 	editor.addButton('hideblocks', {
@@ -512,7 +544,8 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 			internal       : {},
 			type_specific  : {},
 			background     : {},
-			margin_padding : {}
+			margin_padding : {},
+			border         : {},
 		};
 		var type_options = self.contenttypes[type];
 		data = parse_option_data( data, block, type_options );
@@ -590,6 +623,12 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 				});
 			}
 		});
+		if (data.border.simple.status) {
+			showSimpleBorders();
+		} else {
+			showAdvancedBorders();
+		}
+
 	}
 	function parse_option_data( data, block, type_options ) {
 		var temp = block.getAttribute('class');
@@ -610,6 +649,11 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		temp = [];
 		data.margin_padding.margin  = { top: '', right: '', bottom: '', left: '' };
 		data.margin_padding.padding = { top: '', right: '', bottom: '', left: '' };
+		data.border.top = { width: '0', style: 'none', color: '#ffffff' };
+		data.border.right = { width: '0', style: 'none', color: '#ffffff' };
+		data.border.bottom = { width: '0', style: 'none', color: '#ffffff' };
+		data.border.left = { width: '0', style: 'none', color: '#ffffff' };
+		data.border.simple = { status: false, width: '0', style: 'none', color: '#ffffff' };
 		data.background = { image: '', color: '', style: '' };
 		for( var i = 0; i < data.unknown.styles.length; i++ ) {
 			var style_parts = data.unknown.styles[i].split(/:\s*(.+)\s*$/); // lets break the style into an array of [name, value]
@@ -620,6 +664,26 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 						break;
 					case 'padding' :
 						data.margin_padding.padding = parse_option_trbl_style_string( style_parts[1] );
+						break;
+					case 'border' :
+						data.border.top = parse_option_border_style_string( style_parts[1] );
+						data.border.right = parse_option_border_style_string( style_parts[1] );
+						data.border.bottom = parse_option_border_style_string( style_parts[1] );
+						data.border.left = parse_option_border_style_string( style_parts[1] );
+						data.border.simple = parse_option_border_style_string( style_parts[1] );
+						data.border.simple.status = 'true';
+						break;
+					case 'border-top' :
+						data.border.top = parse_option_border_style_string( style_parts[1] );
+						break;
+					case 'border-right' :
+						data.border.right = parse_option_border_style_string( style_parts[1] );
+						break;
+					case 'border-bottom' :
+						data.border.bottom = parse_option_border_style_string( style_parts[1] );
+						break;
+					case 'border-left' :
+						data.border.left = parse_option_border_style_string( style_parts[1] );
 						break;
 					case 'background-image' :
 						var image_url_regex = /url\('(.*)'\)$/;
@@ -661,6 +725,26 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 			data = type_options.parse_block_data( data, block );
 		}
 		return data;
+	}
+	function parse_option_border_style_string( str ) {
+		var border_array = str.split(' ');
+		var border = {
+			width : 0,
+			style : 'none',
+			color : '#ffffff'
+		}
+		if ( border_array.length === 3 ) {
+			border.width = border_array[0];
+			border.style = border_array[1];
+			border.color = border_array[2];
+			return border;
+		}
+		if ( border_array.length === 2 ) {
+			border.width = border_array[0];
+			border.style = border_array[1];
+			return border;
+		}
+		return border;
 	}
 	function parse_option_trbl_style_string( str ) {
 		var trbl_array = str.split(' ');
@@ -710,6 +794,14 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		if( !isNaN(data.left  ) && data.left   != 0 ) { data.left   += 'px'; }
 		return data.top + ' ' + data.right + ' ' + data.bottom + ' ' + data.left;
 	}
+	function convert_data_to_border( data ) {
+		if ( data.style === 'none' || data.width == '0' ) {
+			return 'none';
+		}
+
+		var width = (!isNaN(data.width)) ? data.width + 'px' : data.width;
+		return width + ' ' + data.style + ' ' + data.color;
+	}
 	function render_default_option_tabs( data ) {
 		var styles = data.unknown.styles.join(';');
 		if( styles ) {
@@ -731,6 +823,32 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 				'<div class="blockade-options-one-half">',
 					options_make_square_html( 'Padding', 'padding', data.margin_padding.padding ),
 				'</div>',
+				'<h3>Border Options</h3>',
+				'<table class="blockade-table" id="simple-borders"><thead><tr><th>Side</th><th>Width</th><th>Style</th><th>Color</th></tr></thead><tbody>',
+				'<tr>',
+				'<td>All</td>',
+				render_border_options( data.border.simple, 'all', true ),
+				'</tr>',
+				'<tr><td colspan="4" style="text-align:center;text-decoration:underline;cursor:pointer" border-toggle-options data-toggle-target="advanced">Advanced Borders</td></tr></tbody></table>',
+				'<table class="blockade-table" id="advanced-borders"><thead><tr><th>Side</th><th>Width</th><th>Style</th><th>Color</th></tr></thead><tbody>',
+				'<tr>',
+				'<td>Top</td>',
+				render_border_options( data.border.top, 'top' ),
+				'</tr>',
+				'<tr>',
+				'<td>Right</td>',
+				render_border_options( data.border.right, 'right' ),
+				'</tr>',
+				'<tr>',
+				'<td>Bottom</td>',
+				render_border_options( data.border.bottom, 'bottom' ),
+				'</tr>',
+				'<tr>',
+				'<td>Left</td>',
+				render_border_options( data.border.left, 'left' ),
+				'</tr>',
+				'<tr><td colspan="4" style="text-align:center;text-decoration:underline;cursor:pointer" border-toggle-options data-toggle-target="simple">Simple Border</td></tr>',
+				'</tbody></table>'
 			].join(""),
 			'Background' : [
 				'<div class="blockade-options-one-half">',
@@ -769,6 +887,7 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		var $form = e.target.$el;
 		var customdata = {};
 		var $inputs = $form.find('.mce-container input,.mce-container select,.mce-container textarea').each(function() {
+			var multipart = false;
 			var name = this.getAttribute('name');
 			var type = this.getAttribute('type');
 			var value = '';
@@ -779,7 +898,37 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 			} else {
 				value = this.value;
 			}
-			if( name && !customdata[name] ) {
+			if( name.split( '[' ).length > 1 ) {
+				multipart = true;
+				var path = name.split( /[[\]]{1,2}/ );
+				path = path.splice(0, path.length - 1);
+				if( !customdata[path[0]] ) {
+					customdata[path[0]] = {};
+				}
+				var ref = customdata[path[0]];
+				for( var i = 1; i < path.length; i++ ) {
+					if( i === path.length - 1) {
+						if( path[i] === '' ) {
+							if( !Array.isArray(ref) ) {
+								ref = [];
+							}
+							ref.push(value);
+						} else {
+						ref[path[i]] = value;
+						}
+					} else {
+						if ( !ref[path[i]] ) {
+							if ( path[i + 1] === '' && !ref[path[i + 1]] ) {
+								ref[path[i]] = [];
+							} else {
+								ref[path[i]] = {};
+							}
+						}
+						ref = ref[path[i]];
+					}
+				}
+			}
+			if( name && !customdata[name] && !multipart ) {
 				customdata[name] = value;
 			}
 		});
@@ -835,6 +984,19 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 			}
 		}
 		styles = margin_padding_str + styles;
+
+		// apply border
+		if ( typeof form_data['border'] !== 'undefined' ) {
+			var border_styles = '';
+			var sides = [ 'top', 'right', 'bottom', 'left' ];
+			for ( var i = 0; i < sides.length; i ++ ) {
+				var side = sides[i];
+				border_styles += 'border-' + side + ':';
+				border_styles += convert_data_to_border(form_data['border'][side]) + ';';
+			}
+			styles = border_styles += styles;
+		}
+
 		// apply background
 		var bg_str = "";
 		if( form_data['bg_color'] ) {
@@ -880,6 +1042,11 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		el.setAttribute('class', classes);
 		el.setAttribute('style', styles);
 		el.setAttribute('data-mce-style', styles);
+		// This lets tiny mce do its thing on the html. Things like:
+		//  - cleaning up stray tags
+		//  - taking elements out of containers that should have elements in the (p's for example)
+		//  - creates the most efficient inline styles
+		self.editor.setContent(tinymce.activeEditor.getContent());
 	}
 
 	// SECTION ---------------------------------------------------------------------
@@ -923,6 +1090,13 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		var media_frame = null;
 		document.body.addEventListener('click', function(e){
 			if( e.target ) {
+				if ( e.target.hasAttribute( 'border-toggle-options' ) ) {
+					if ( e.target.getAttribute( 'data-toggle-target' ) === 'simple' ) {
+						showSimpleBorders();
+					} else {
+						showAdvancedBorders();
+					}
+				}
 				if( hasClass( e.target, "blockade-options-tab" ) && !hasClass( e.target, "active" ) ) {
 					e.preventDefault();
 					e.stopPropagation();
@@ -1049,6 +1223,7 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 							}
 						}
 						removeClass( wrapper, 'blockade-options-color-picker-open' );
+						triggerColorChange( input );
 					}
 				} else if( e.target.tagName == "BUTTON" &&  hasClass( e.target.parentElement, 'blockade-options-color-picker-cell-custom-color' ) ) {
 					var wrapper = null;
@@ -1088,6 +1263,7 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 						input.value = value;
 						if(value) {
 							preview.setAttribute('style', 'background-color: ' + value );
+							triggerColorChange( input );
 						} else {
 							preview.removeAttribute('style');
 						}
@@ -1106,6 +1282,19 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 				}
 			}
 		}
+		document.body.addEventListener('change', function(e) {
+			if ( e.target ) {
+				if ( e.target.hasAttribute( 'border-master-control' ) ) {
+					var sides = [ 'top', 'right', 'bottom', 'left' ];
+					var target = e.target.getAttribute('master-target');
+					var new_value = e.target.value;
+					for (var i = 0; i < sides.length; i++) {
+						var name = 'border[' + sides[i] + '][' + target + ']';
+						document.querySelectorAll('[name="' + name + '"]')[0].value = new_value;
+					}
+				}
+			}
+		});
 	}
 
 	// SECTION --------------------------------------------------------------------- FILTER
@@ -1854,7 +2043,7 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		].join('');
 		return( str );
 	}
-	function options_make_color_picker_html( name, slug, value ) {
+	function options_make_color_picker_html( name, slug, value, include_label = true, attributes = '' ) {
 		// lifted with modification from tinymce textcolor plugin
 		var cols, rows;
 		rows = editor.settings.textcolor_rows || 5;
@@ -1933,7 +2122,7 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 				text: tinymce.translate("No color"),
 				color: "transparent"
 			});
-			html = '<table class="mce-grid mce-grid-border mce-colorbutton-grid" role="list" cellspacing="0"><tbody>';
+			html = '<table class="mce-grid mce-grid-border mce-colorbutton-grid" role="list" cellspacing="0" ' + attributes + '><tbody>';
 			last = colors.length - 1;
 			for (y = 0; y < rows; y++) {
 				html += '<tr>';
@@ -1969,11 +2158,13 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 			return html;
 		}
 
+		var label = (include_label) ? '<span>' + name + ': </span>' : '';
+
 		var str = [
 			'<label class="blockade-options-color-picker">',
-				'<span>' + name + ': </span>',
+				label,
 				'<div class="blockade-options-color-picker-input-container">',
-					'<input type="text" name="' + slug + '" value="' + value + '" disabled="disabled" class="mce-textbox" data-blockade-role="colorpicker">',
+					'<input type="text" name="' + slug + '" value="' + value + '" disabled="disabled" class="mce-textbox" data-blockade-role="colorpicker" ' + attributes + '>',
 					'<span class="blockade-options-color-picker-preview" style="background-color: ' + value + ';"></span>',
 					'<div class="blockade-options-color-picker-wrapper">',
 						renderColorPicker(),
@@ -1983,11 +2174,12 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		].join('');
 		return str;
 	}
-	function options_make_select_box_html( name, slug, options, value ) {
+	function options_make_select_box_html( name, slug, options, value, show_label = true, attributes = '' ) {
+		var label = (show_label) ? '<label class="blockade-options-select"><span>' + name + ': </span>' : '';
+		var end_label = (show_label) ? '</label>' : '';
 		var str = [
-			'<label class="blockade-options-select">',
-				'<span>' + name + ': </span>',
-				'<select name="' + slug + '" class="mce-textbox">',
+				label,
+				'<select name="' + slug + '" class="mce-textbox" ' + attributes + '>',
 		].join('');
 		for (var key in options) {
 			if (options.hasOwnProperty(key)) {
@@ -2000,9 +2192,28 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		}
 		str += [
 				'</select>',
-			'</label>',
+			end_label,
 		].join('');
 		return str;
+	}
+	function render_border_options( data, side, master ) {
+		var master_flag = (master) ? 'border-master-control' : '';
+		var row = '<td><input type="text" ' + master_flag + ' class="mce-textbox" name="border[' + side + '][width]" value="' + data.width + '" master-target="width"></td><td>';
+		row += options_make_select_box_html( '', 'border[' + side + '][style]', {
+			'none'     : 'None',
+			'hidden'    : 'Hidden',
+			'dotted'    : 'Dotted',
+			'dashed'    : 'Dashed',
+			'solid'    : 'Solid',
+			'double'    : 'Double',
+			'groove'    : 'Groove',
+			'ridge'    : 'Ridge',
+			'inset'    : 'Inset',
+			'outset'    : 'Outset',
+		}, data.style, false, master_flag + ' master-target="style"' );
+		row += '</td><td>';
+		row += options_make_color_picker_html( '', 'border[' + side + '][color]', data.color, false, master_flag + ' master-target="color"' ) + '</td>';
+		return row;
 	}
 
 	// jQuery equivalents
@@ -2162,5 +2373,28 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 			.replace(/&gt;/g, ">")
 			.replace(/&quot;/g, "\"")
 			.replace(/&#039;/g, "'");
+	 }
+
+	 function showSimpleBorders() {
+		 document.getElementById( 'advanced-borders' ).style.display = 'none';
+		 document.getElementById( 'simple-borders' ).style.display = 'table';
+	 }
+	 function showAdvancedBorders() {
+		 document.getElementById( 'advanced-borders' ).style.display = 'table';
+		 document.getElementById( 'simple-borders' ).style.display = 'none';
+	 }
+
+	 function triggerColorChange(element) {
+		// This should really just trigger a change event on the body, with a target of the element.
+		// Easier said than done.
+		if ( element.hasAttribute( 'border-master-control' ) ) {
+			var sides = [ 'top', 'right', 'bottom', 'left' ];
+			var target = element.getAttribute('master-target');
+			var new_value = element.value;
+			for (var i = 0; i < sides.length; i++) {
+				var name = 'border[' + sides[i] + '][' + target + ']';
+				document.querySelectorAll('[name="' + name + '"]')[0].value = new_value;
+			}
+		}
 	 }
 });

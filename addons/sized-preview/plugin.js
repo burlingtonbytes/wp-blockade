@@ -4,7 +4,7 @@
 	Author: Burlington Bytes
 	Author URI: http://www.burlingtonbytes.com
 */
-tinymce.PluginManager.add('blockade_sidebar', function(editor, url) {
+tinymce.PluginManager.add('blockade_sidebar_preview', function(editor, url) {
 	// kill if older than IE8
 	if (!window.NodeList) { return; }
 	// load blockade object
