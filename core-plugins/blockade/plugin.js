@@ -30,6 +30,7 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 	self.editor     = editor;
 	self.document   = false;
 	self.body       = false;
+	self.isdirty    = false;
 	self.wrapInUndo = function(callback) {
 		// placeholder for the undo transaction function, until it is initialized
 		callback();
@@ -311,14 +312,14 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		temp_node = unwrap_content(temp_node);
 		var paste = temp_node.innerHTML;
 		e.content = paste;
-		document.getElementById('content_ifr').contentWindow.document.getElementById('tinymce').setAttribute('data-dirty', 'true');
+		self.isdirty = true;
 	});
 	// If content is changed, check we need to clean it.
 	tinymce.activeEditor.on('change', function (e) {
 		var mce = document.getElementById('content_ifr').contentWindow.document.getElementById('tinymce');
-		if (mce.hasAttribute('data-dirty') && mce.getAttribute('data-dirty') === 'true') {
+		if (self.isdirty) {
 			self.editor.setContent(self.editor.getContent());
-			mce.setAttribute('data-dirty', 'false');
+			self.isdirty = false;
 		}
 	});
 	function unwrap_content(node) {
@@ -620,6 +621,11 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 					if( type_options.apply_form_results ) {
 						 type_options.apply_form_results( data, form_data, block );
 					}
+					// This lets tiny mce do its thing on the html. Things like:
+					//  - cleaning up stray tags
+					//  - taking elements out of containers that should have elements in the (p's for example)
+					//  - creates the most efficient inline styles
+					self.editor.setContent(self.editor.getContent());
 				});
 			}
 		});
@@ -653,7 +659,7 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		data.border.right = { width: '0', style: 'none', color: '#ffffff' };
 		data.border.bottom = { width: '0', style: 'none', color: '#ffffff' };
 		data.border.left = { width: '0', style: 'none', color: '#ffffff' };
-		data.border.simple = { status: false, width: '0', style: 'none', color: '#ffffff' };
+		data.border.simple = { status: true, width: '0', style: 'none', color: '#ffffff' };
 		data.background = { image: '', color: '', style: '' };
 		for( var i = 0; i < data.unknown.styles.length; i++ ) {
 			var style_parts = data.unknown.styles[i].split(/:\s*(.+)\s*$/); // lets break the style into an array of [name, value]
@@ -671,19 +677,23 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 						data.border.bottom = parse_option_border_style_string( style_parts[1] );
 						data.border.left = parse_option_border_style_string( style_parts[1] );
 						data.border.simple = parse_option_border_style_string( style_parts[1] );
-						data.border.simple.status = 'true';
+						data.border.simple.status = true;
 						break;
 					case 'border-top' :
 						data.border.top = parse_option_border_style_string( style_parts[1] );
+						data.border.simple.status = false;
 						break;
 					case 'border-right' :
 						data.border.right = parse_option_border_style_string( style_parts[1] );
+						data.border.simple.status = false;
 						break;
 					case 'border-bottom' :
 						data.border.bottom = parse_option_border_style_string( style_parts[1] );
+						data.border.simple.status = false;
 						break;
 					case 'border-left' :
 						data.border.left = parse_option_border_style_string( style_parts[1] );
+						data.border.simple.status = false;
 						break;
 					case 'background-image' :
 						var image_url_regex = /url\('(.*)'\)$/;
@@ -1042,11 +1052,6 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		el.setAttribute('class', classes);
 		el.setAttribute('style', styles);
 		el.setAttribute('data-mce-style', styles);
-		// This lets tiny mce do its thing on the html. Things like:
-		//  - cleaning up stray tags
-		//  - taking elements out of containers that should have elements in the (p's for example)
-		//  - creates the most efficient inline styles
-		self.editor.setContent(tinymce.activeEditor.getContent());
 	}
 
 	// SECTION ---------------------------------------------------------------------

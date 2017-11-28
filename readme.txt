@@ -8,38 +8,23 @@ Stable tag: trunk
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Blockade is the WordPress editor done right. It's a lightweight, flexible visual
-page builder that lets you build stunning layouts in seconds.
+Blockade is the WordPress editor done right. It's a lightweight, flexible visual page builder that lets you build stunning layouts in seconds.
 
 == Description ==
 
-> Blockade is in public beta. There may be frequent releases and features may change
-> as we work towards releasing version 1.0. Please let us know about your experience,
-> so we can make Blockade even better.
+> Blockade is in public beta. There may be frequent releases and features may change as we work towards releasing version 1.0. Please let us know about your experience, so we can make Blockade even better.
 
 = Blockade will change the way you look at designing and building for the web =
 
-Page builders are usually overbuilt and hard to learn to use effectively. Blockade
-turns that trend on its head, and provides a lightweight page builder that
-integrates directly into your site's existing interface. With Blockade, you can
-build beautiful, professional, and standards-compliant responsive layouts, in
-seconds.
+Page builders are usually overbuilt and hard to learn to use effectively. Blockade turns that trend on its head, and provides a lightweight page builder that integrates directly into your site's existing interface. With Blockade, you can build beautiful, professional, and standards-compliant responsive layouts, in seconds.
 
-Want to know the best part? Your layout is built in clean, easy to edit HTML5,
-with the popular Bootstrap framework.  Need to make a change beyond what the
-interface allows? Simply switch to text mode and edit the HTML directly.
+Want to know the best part? Your layout is built in clean, easy to edit HTML5, with the popular Bootstrap framework.  Need to make a change beyond what the interface allows? Simply switch to text mode and edit the HTML directly.
 
 = Built for real designers with real clients =
 
-Real clients have sites with custom metaboxes, shortcodes, widgets, and theme
-options built into their editors. Most page builders ignore those crucial controls,
-and focus on building a new interface, just for their custom experience. They aren't
-good at being a tool that adds to an existing workflow.
+Real clients have sites with custom metaboxes, shortcodes, widgets, and theme options built into their editors. Most page builders ignore those crucial controls, and focus on building a new interface, just for their custom experience. They aren't good at being a tool that adds to an existing workflow.
 
-We built Blockade to give our clients the WordPress experience they deserve. It
-cut its teeth on the real problems users face with designing and editing, and working
-with common plugins like ACF and Slider Revolution. It has revolutionized editing
-for our team and our clients.
+We built Blockade to give our clients the WordPress experience they deserve. It cut its teeth on the real problems users face with designing and editing, and working with common plugins like ACF and Slider Revolution. It has revolutionized editing for our team and our clients.
 
 Now we're ready to revolutionize editing for everyone else.
 
@@ -66,13 +51,11 @@ Learn more at [https://www.wpblockade.com](https://www.wpblockade.com)
 
 = Why should I choose Blockade, over other visual page builders? =
 
-Blockade is lightweight and flexible, and integrates well with existing themes.
-It can even use your own version of Bootstrap, to make page loads as fast as possible.
+Blockade is lightweight and flexible, and integrates well with existing themes. It can even use your own version of Bootstrap, to make page loads as fast as possible.
 
 = Do I need to know HTML or CSS to use Blockade? =
 
-Not at all! Blockade is a true visual editor, with all options controllable in a
-simple drag and drop interface.
+Not at all! Blockade is a true visual editor, with all options controllable in a simple drag and drop interface.
 
 = See more frequently asked questions =
 
@@ -85,6 +68,17 @@ simple drag and drop interface.
 3. You can even live preview your page, without ever leaving the WordPress editor
 
 == Changelog ==
+
+= 0.9.9 (11/28/2017) =
+* Fix for pasting issue in embedded blockade editors
+
+= 0.9.8 (10/27/2017) =
+* Fix to buttons without an icon
+* Fix for missing widgets block
+* Many style improvements
+* Fix for cut/paste issues
+* New border controls on all blocks
+
 
 = 0.9.7 (10/27/2017) =
 * Fix to buttons without an icon
