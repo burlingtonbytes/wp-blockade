@@ -69,6 +69,10 @@ Not at all! Blockade is a true visual editor, with all options controllable in a
 
 == Changelog ==
 
+= 0.9.10 (01/11/2018) =
+* Whitelist blockade html for restricted user roles
+* Improve post excerpts
+
 = 0.9.9 (11/28/2017) =
 * Fix for pasting issue in embedded blockade editors
 

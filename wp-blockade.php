@@ -5,16 +5,17 @@
  * Author: Burlington Bytes
  * Author URI: https://www.burlingtonbytes.com
  * Description: Lightweight and intuitive Visual Editor for Designers, Developers, and End Users.
- * Version: 0.9.9
+ * Version: 0.9.10
  */
 if( !class_exists('WP_Blockade') ) {
 	class WP_Blockade {
-		public static $version = 'v0.9.9';
+		public static $version = 'v0.9.10';
 		private static $_this;
 		private $plugin_dir;
 		private $plugin_dir_url;
 		private $editors;
 		private $post_types;
+		private $data_attributes;
 		private $wpautop_disabled = false;
 		private $default_opts = array(
 			'editors' => array(),
@@ -97,15 +98,17 @@ if( !class_exists('WP_Blockade') ) {
 		}
 
 		private function __construct() {
+			require_once 'classes/BBytes_Better_Auto_Excerpts.php';
 			$this->plugin_dir = dirname( __FILE__ );
 			$this->plugin_dir_url = plugin_dir_url( __FILE__ );
-			add_action( 'init'              , array( $this, 'load_blockade' ), PHP_INT_MAX ); // run this action last, so all post types are populated
+			add_action( 'init'                , array( $this, 'load_blockade' ), PHP_INT_MAX ); // run this action last, so all post types are populated
 			add_filter( 'extra_wp_blockade_custom_block_headers', array( $this, 'wp_blockade_custom_block_headers' ) );
-			add_action( 'the_post'          , array( $this, 'wp_blockade_disable_wpautop' ) );
-			add_filter( 'the_content'       , array( $this, 'filter_blockade_shortcodes' ), ~PHP_INT_MAX );
-			add_filter( 'the_content'       , array( $this, 'wp_blockade_strip_data_tags' ) );
-			add_action( 'loop_end'          , array( $this, 'wp_blockade_enable_wpautop' ) );
-			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles_and_scripts' ) );
+			add_filter( 'wp_kses_allowed_html', array( $this, 'whitelist_blockade_data_attributes' ), 100, 2);
+			add_action( 'the_post'            , array( $this, 'wp_blockade_disable_wpautop' ) );
+			add_filter( 'the_content'         , array( $this, 'filter_blockade_shortcodes' ), ~PHP_INT_MAX );
+			add_filter( 'the_content'         , array( $this, 'wp_blockade_strip_data_tags' ) );
+			add_action( 'loop_end'            , array( $this, 'wp_blockade_enable_wpautop' ) );
+			add_action( 'wp_enqueue_scripts'  , array( $this, 'enqueue_styles_and_scripts' ) );
 			add_action( 'admin_post_wp-blockade-shortcode-render', array( $this, 'render_shortcode_preview') );
 		}
 
@@ -148,6 +151,7 @@ if( !class_exists('WP_Blockade') ) {
 
 		public function load_blockade() {
 			$this->populate_settings();
+
 			if( ( defined( 'WP_BLOCKADE_FORCE_LOAD' ) && WP_BLOCKADE_FORCE_LOAD ) || ( is_admin() && !( defined( 'DOING_AJAX' ) && DOING_AJAX ) && current_user_can( 'edit_pages' ) ) ) {
 				add_filter('tiny_mce_before_init', array( $this, 'blockade_modify_tinymce_options' ) );
 			}
@@ -282,20 +286,30 @@ if( !class_exists('WP_Blockade') ) {
 			return $content;
 		}
 
+		public function whitelist_blockade_data_attributes( $elements, $context ) {
+			$this->populate_settings();
+			$atts = array();
+			foreach( $this->data_attributes as $att ) {
+				$atts[$att] = true;
+			}
+			if( !isset( $elements['div'] ) ) {
+				$elements['div'] = array();
+			}
+			foreach( $elements as $el => $val ) {
+				$elements[$el] = array_merge( $val, $atts );
+			}
+			return $elements;
+		}
+
 		public function wp_blockade_strip_data_tags($content) {
+			$this->populate_settings();
 			$post_type = get_post_type();
 			if( !in_array( $post_type, $this->post_types ) ) {
 				return $content;
 			}
-			$attributes = array(
-				"data-wp-blockade-role",
-				"data-wp-blockade-type",
-				"data-wp-blockade-flags"
-			);
-			$attributes = apply_filters( 'wp-blockade-data-attributes', $attributes );
 
 			$filtered = $content;
-			foreach($attributes as $attribute) {
+			foreach($this->data_attributes as $attribute) {
 				$pattern = "/<[^>]*?(\s+".$attribute."\s*=\s*(?:(?:[\"][^\"]*[\"])|(?:'[^']*')))[^>]*?>/m";
 				$matches = array();
 				preg_match_all( $pattern, $filtered, $matches, PREG_OFFSET_CAPTURE );
@@ -374,6 +388,16 @@ if( !class_exists('WP_Blockade') ) {
 
 		// Private Functions
 		private function populate_settings() {
+			if( $this->options ) {
+				return;
+			}
+			$attributes = array(
+				"data-wp-blockade-role",
+				"data-wp-blockade-type",
+				"data-wp-blockade-flags"
+			);
+			$this->data_attributes = apply_filters( 'wp-blockade-data-attributes', $attributes );
+
 			$disallowed_post_types = array(
 				'attachment',
 				'revision',

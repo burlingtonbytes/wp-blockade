@@ -316,7 +316,6 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 	});
 	// If content is changed, check we need to clean it.
 	tinymce.activeEditor.on('change', function (e) {
-		var mce = document.getElementById('content_ifr').contentWindow.document.getElementById('tinymce');
 		if (self.isdirty) {
 			self.editor.setContent(self.editor.getContent());
 			self.isdirty = false;
