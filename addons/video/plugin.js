@@ -53,7 +53,7 @@ tinymce.PluginManager.add('video_block', function(editor, url) {
 			var tempData = block.getAttribute( 'data-wp-blockade-videoblockdata' );
 			var tempDecoded = false;
 			if( tempData ) {
-				var tempDecoded = JSON.parse(tempData);
+				var tempDecoded = blockade.decodeAttr(tempData);
 			}
 			if( tempDecoded ) {
 				data.type_specific = tempDecoded;
@@ -88,7 +88,7 @@ tinymce.PluginManager.add('video_block', function(editor, url) {
 				'</div>'
 			].join('');
 			block.innerHTML = vidblock;
-			block.setAttribute( 'data-wp-blockade-videoblockdata', JSON.stringify( form_data ) );
+			block.setAttribute( 'data-wp-blockade-videoblockdata', blockade.encodeAttr( form_data ) );
 		}
 	};
 	function parse_video_link(link) {

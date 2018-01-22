@@ -241,7 +241,7 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 	self.addClass           = function(el, a    ) { return addClass(el, a);       };
 	self.removeClass        = function(el, a    ) { return removeClass(el, a);    };
 	self.toggleClass        = function(el, a    ) { return toggleClass(el, a);    };
-	self.getData            = function(el, a    ) { return setData(el, a   );     };
+	self.getData            = function(el, a    ) { return getData(el, a   );     };
 	self.setData            = function(el, a, b ) { return setData(el, a, b);     };
 	self.getType            = function(el       ) { return getType(el       );    };
 	self.setType            = function(el, a    ) { return setType(el, a    );    };
@@ -256,6 +256,8 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 	self.options_make_select_box_html     = function( name, slug, options, value ) { return options_make_select_box_html( name, slug, options, value   ); };
 	self.escapeHtml    = function( html ) { return escapeHtml( html   ); };
 	self.unescapeHtml  = function( html ) { return unescapeHtml( html ); };
+	self.encodeAttr    = function( obj ) { return encodeAttr( obj ); };
+	self.decodeAttr    = function( str ) { return decodeAttr( str ); };
 	self.build_shortcode_iframe = function( a, b ) { return build_shortcode_iframe( a, b ); };
 	window.wp_blockade_resize_iframe = function( el   ) { return resize_iframe( el  ); }
 
@@ -861,7 +863,7 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 			].join(""),
 			'Background' : [
 				'<div class="blockade-options-one-half">',
-					options_make_image_uploader_html( 'Background Image', 'bg_image', JSON.stringify( { url: data.background.image } ), true ),
+					options_make_image_uploader_html( 'Background Image', 'bg_image', encodeAttr( { url: data.background.image } ), true ),
 				'</div>',
 				'<div class="blockade-options-one-half">',
 					'<h3>Background Options</h3>',
@@ -1012,7 +1014,7 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 			bg_str += "background-color:" + form_data['bg_color'] + ";";
 		}
 		if( form_data['bg_image'] ) {
-			var image_data = JSON.parse(form_data['bg_image']);
+			var image_data = decodeAttr(form_data['bg_image']);
 			if( image_data && image_data.url && image_data.url != self.assets.no_image ) {
 				var image_url = image_data.url;
 				if( image_data.size && image_data.sizes[image_data.size] && image_data.sizes[image_data.size].url ) {
@@ -1164,7 +1166,7 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 						var selection    = media_frame.state().get('selection');
 						var parent       = e.target.parentElement;
 						var imagefield   = parent.querySelector('.blockade-options-image-data');
-						var imageData    = JSON.parse(imagefield.value);
+						var imageData    = decodeAttr(imagefield.value);
 						if( imageData && imageData.id ) {
 							attachment = wp.media.attachment(imageData.id);
 							attachment.fetch();
@@ -1181,7 +1183,7 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 						var selection    = attachment.toJSON();
 						var display      = state.display( attachment ).toJSON();
 						var value = _.defaults( selection, display );
-						imagefield.value = JSON.stringify( value );
+						imagefield.value = encodeAttr( value );
 						previewwrap.innerHTML = '<img src="' + selection.url + '" alt="' + selection.caption + '" title="' + selection.title + '">';
 						if( del ) {
 							addClass( del, 'blockade-options-image-remove-visible' );
@@ -1194,7 +1196,7 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 					var parent       = e.target.parentElement;
 					var previewwrap  = parent.querySelector('.blockade-options-image-preview');
 					var imagefield   = parent.querySelector('.blockade-options-image-data');
-					imagefield.value = JSON.stringify( { url: '' } );
+					imagefield.value = encodeAttr( { url: '' } );
 					previewwrap.innerHTML = '<img src="' + self.assets.no_image + '" alt="Default Image" title="">';
 					removeClass( e.target, 'blockade-options-image-remove-visible' );
 				} else if(
@@ -2005,7 +2007,7 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		var button_text = "Change Image";
 		var data = null;
 		if( datastr ) {
-			var data = JSON.parse( datastr );
+			var data = decodeAttr( datastr );
 		}
 		if( typeof data !== 'object' ) {
 			data = {};
@@ -2368,27 +2370,39 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 			.replace(/</g, "&lt;")
 			.replace(/>/g, "&gt;")
 			.replace(/"/g, "&quot;")
-			.replace(/'/g, "&#039;");
-	 }
-	 function unescapeHtml(unsafe) {
+			.replace(/'/g, "&#039;")
+			.replace(/\//g, '&#x2F;');
+	}
+	function unescapeHtml(unsafe) {
 		return unsafe
-			.replace(/&amp;/g, "&")
-			.replace(/&lt;/g, "<")
-			.replace(/&gt;/g, ">")
+			.replace(/&#x2F;/g, "/")
+			.replace(/&#039;/g, "'")
 			.replace(/&quot;/g, "\"")
-			.replace(/&#039;/g, "'");
-	 }
+			.replace(/&gt;/g, ">")
+			.replace(/&lt;/g, "<")
+			.replace(/&amp;/g, "&");
+	}
 
-	 function showSimpleBorders() {
-		 document.getElementById( 'advanced-borders' ).style.display = 'none';
-		 document.getElementById( 'simple-borders' ).style.display = 'table';
-	 }
+	function encodeAttr( obj ) {
+		var str = JSON.stringify( obj );
+		return escapeHtml( str );
+
+	}
+	function decodeAttr( str ) {
+		str = unescapeHtml( str );
+		return JSON.parse(str);
+	}
+
+	function showSimpleBorders() {
+		document.getElementById( 'advanced-borders' ).style.display = 'none';
+		document.getElementById( 'simple-borders' ).style.display = 'table';
+	}
 	 function showAdvancedBorders() {
-		 document.getElementById( 'advanced-borders' ).style.display = 'table';
-		 document.getElementById( 'simple-borders' ).style.display = 'none';
-	 }
+		document.getElementById( 'advanced-borders' ).style.display = 'table';
+		document.getElementById( 'simple-borders' ).style.display = 'none';
+	}
 
-	 function triggerColorChange(element) {
+	function triggerColorChange(element) {
 		// This should really just trigger a change event on the body, with a target of the element.
 		// Easier said than done.
 		if ( element.hasAttribute( 'border-master-control' ) ) {
@@ -2400,5 +2414,5 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 				document.querySelectorAll('[name="' + name + '"]')[0].value = new_value;
 			}
 		}
-	 }
+	}
 });

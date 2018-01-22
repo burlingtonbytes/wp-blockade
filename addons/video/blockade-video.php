@@ -10,6 +10,8 @@
 		private static $_this;
 		private $addon_dir;
 		private $addon_dir_url;
+		private $data_attributes;
+
 
 		public static function Instance() {
 			static $instance = null;
@@ -24,6 +26,9 @@
 			$this->addon_dir_url = plugin_dir_url( __FILE__ );
 			add_filter( 'wp-blockade-tinymce-plugins', array( $this, "register_tinymce_plugin" ), 40 );
 			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
+
+			add_filter( 'wp_kses_allowed_html', array( $this, 'whitelist_blockade_data_attributes' ), 100, 2);
+
 			// add_filter( 'wp-blockade-top-level-buttons', array( $this, "register_tinymce_top_level_buttons" ) ); // this should rarely be used
 		}
 		// PUBLIC FUNCTIONS
@@ -33,6 +38,55 @@
 		}
 		public function enqueue_styles() {
 			wp_enqueue_style( 'wp-blockade-video-styles', $this->addon_dir_url . 'styles.css', array(), WP_Blockade::$version );
+		}
+    public function populate_settings(){
+      $this->data_attributes = array(
+        'data-wp-blockade-videoblockdata',
+        'data-wp-blockade-href',
+      );
+      $this->iframe_attributes = array(
+        'src',
+        'allowfullscreen',
+        'width',
+        'height',
+        'frameborder',
+        'id',
+        'class',
+        'allowtransparency',
+        'style'
+      );
+
+		public function whitelist_blockade_data_attributes( $elements, $context ) {
+			$data_attributes = array(
+				'data-wp-blockade-videoblockdata',
+				'data-wp-blockade-href',
+			);
+			$iframe_attributes = array(
+				'src',
+				'allowfullscreen',
+				'width',
+				'height',
+				'frameborder',
+				'id',
+				'class',
+				'allowtransparency',
+				'style'
+			);
+			$data_atts = array();
+			$iframe_atts = array();
+			foreach( $data_attributes as $att ) {
+				$data_atts[$att] = true;
+  		}
+			foreach( $iframe_attributes as $att){
+				$iframe_atts[$att] = true;
+			}
+			if( !isset( $elements['iframe'] ) ) {
+				$elements['iframe'] = $iframe_atts;
+			}
+			foreach( $elements as $el => $val ) {
+				$elements[$el] = array_merge( $val, $data_atts );
+			}
+			return $elements;
 		}
 
 		/*

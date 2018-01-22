@@ -69,6 +69,9 @@ Not at all! Blockade is a true visual editor, with all options controllable in a
 
 == Changelog ==
 
+= 0.9.11 (01/22/2018) =
+* Improve data encoding for JSON stored in HTML attributes 
+
 = 0.9.10 (01/11/2018) =
 * Whitelist blockade html for restricted user roles
 * Improve post excerpts

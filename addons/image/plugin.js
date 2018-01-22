@@ -64,14 +64,14 @@ tinymce.PluginManager.add('image_block', function(editor, url) {
 			return data;
 		},
 		render_html : function( data ) {
-			var image_str = JSON.stringify( data.type_specific.image );
+			var image_str = blockade.encodeAttr( data.type_specific.image );
 			var str = [
 				blockade.options_make_image_uploader_html("", 'main_image', image_str )
 			].join('');
 			return str;
 		},
 		apply_form_results : function( data, form_data, block ) {
-			attachmentData = JSON.parse( form_data.main_image );
+			attachmentData = blockade.decodeAttr( form_data.main_image );
 			if( attachmentData && attachmentData.url ) {
 				var image = attachmentData;
 				var size = 'full';
