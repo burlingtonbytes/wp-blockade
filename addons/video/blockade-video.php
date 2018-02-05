@@ -10,8 +10,6 @@
 		private static $_this;
 		private $addon_dir;
 		private $addon_dir_url;
-		private $data_attributes;
-
 
 		public static function Instance() {
 			static $instance = null;
@@ -39,23 +37,6 @@
 		public function enqueue_styles() {
 			wp_enqueue_style( 'wp-blockade-video-styles', $this->addon_dir_url . 'styles.css', array(), WP_Blockade::$version );
 		}
-    public function populate_settings(){
-      $this->data_attributes = array(
-        'data-wp-blockade-videoblockdata',
-        'data-wp-blockade-href',
-      );
-      $this->iframe_attributes = array(
-        'src',
-        'allowfullscreen',
-        'width',
-        'height',
-        'frameborder',
-        'id',
-        'class',
-        'allowtransparency',
-        'style'
-      );
-
 		public function whitelist_blockade_data_attributes( $elements, $context ) {
 			$data_attributes = array(
 				'data-wp-blockade-videoblockdata',
