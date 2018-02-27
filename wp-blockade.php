@@ -5,11 +5,11 @@
  * Author: Burlington Bytes
  * Author URI: https://www.burlingtonbytes.com
  * Description: Lightweight and intuitive Visual Editor for Designers, Developers, and End Users.
- * Version: 0.9.10
+ * Version: 0.9.12
  */
 if( !class_exists('WP_Blockade') ) {
 	class WP_Blockade {
-		public static $version = 'v0.9.10';
+		public static $version = 'v0.9.12';
 		private static $_this;
 		private $plugin_dir;
 		private $plugin_dir_url;
@@ -224,15 +224,24 @@ if( !class_exists('WP_Blockade') ) {
 				}
 				$bootstrap = get_theme_support( 'bootstrap' );
 				$bootstrap_major_version = "3";
+				$bootstrap_4_alpha = true;
 				if( $bootstrap && !empty( $bootstrap[0] ) ) {
 					$bootstrap = $bootstrap[0];
-					$bootstrap_major_version = $bootstrap[0];
+					$bootstrap_major_version = $bootstrap[0]; // This just gets the first character. '4'
 				}
 				$framework_css = $this->plugin_dir_url . 'assets/css/wp-blockade-bootstrap.v3.3.7.min.css';
-				if( $bootstrap && version_compare( $bootstrap, '4.0.0.a.0', '>=' ) ) {
-					$framework_css = $this->plugin_dir_url . 'assets/css/wp-blockade-bootstrap.v4.0.0.a6.min.css';
+				if( $bootstrap ) {
+					if( version_compare( $bootstrap, '4.0.0-alpha.0', '>=' ) ) {
+						$framework_css = $this->plugin_dir_url . 'assets/css/wp-blockade-bootstrap.v4.0.0.a6.min.css';
+					}
+					if( version_compare( $bootstrap, '4.0.0-alpha.6', '>' ) ) {
+						// Anything after alpha (beta and production) can use the production version
+						$bootstrap_4_alpha = false;
+						$framework_css = $this->plugin_dir_url . 'assets/css/wp-blockade-bootstrap.v4.0.0.min.css';
+					}
 				}
 				$tinymce_options['wp_blockade_bootstrap_major_version'] = $bootstrap_major_version;
+				$tinymce_options['wp_blockade_bootstrap_4_alpha'] = $bootstrap_4_alpha;
 				$tinymce_options['wp_blockade_framework_css'] = apply_filters( 'wp-blockade-framework-css', $framework_css );
 				// remove offending plugins
 				$tinymce_options['plugins'                ] = $this->blockade_modify_csl( $tinymce_options['plugins'], null, $this->options['bad_plugins'] );
@@ -252,6 +261,12 @@ if( !class_exists('WP_Blockade') ) {
 				$tinymce_options['wpautop'                ] = false;
 				$tinymce_options['remove_linebreaks'      ] = false;
 				$tinymce_options['apply_source_formatting'] = true;
+
+				// hook for addons
+				$tinymce_options['wp_blockade_addon_data']     = '';
+
+				$addon_data = apply_filters('wp_blockade_tinymce_addon_options', array());
+				$tinymce_options['wp_blockade_addon_data']  = json_encode($addon_data);
 			}
 			// explicitly set variable so non-blockade tinymce's dont accidentally inherit it
 			if(!isset($tinymce_options['external_plugins']) || !$tinymce_options['external_plugins']) {

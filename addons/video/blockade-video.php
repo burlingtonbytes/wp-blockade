@@ -37,6 +37,7 @@
 		public function enqueue_styles() {
 			wp_enqueue_style( 'wp-blockade-video-styles', $this->addon_dir_url . 'styles.css', array(), WP_Blockade::$version );
 		}
+
 		public function whitelist_blockade_data_attributes( $elements, $context ) {
 			$data_attributes = array(
 				'data-wp-blockade-videoblockdata',

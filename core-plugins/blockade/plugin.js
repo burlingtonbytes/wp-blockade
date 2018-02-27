@@ -266,7 +266,8 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		self.editor     = tinymce.activeEditor;
 		self.document   = editor.getDoc();
 		self.body       = editor.getBody();
-		// self.wrapInUndo = self.editor.undoManager.transact;
+        self.addonData  = editor.plugins.blockade.editor.settings.wp_blockade_addon_data;
+        // self.wrapInUndo = self.editor.undoManager.transact;
 		// !! START NASTY HACK  <-- addresses the fact that undoManager is sometimes uninitialized when this runs... no idea why yet, might be YOAST related (or other plugins)?
 		var waitForUndo = setInterval( function(){
 			if( self.editor.undoManager && self.editor.undoManager.transact ) {

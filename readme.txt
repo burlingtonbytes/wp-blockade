@@ -69,6 +69,10 @@ Not at all! Blockade is a true visual editor, with all options controllable in a
 
 == Changelog ==
 
+= 0.9.12 (02/27/2018) =
+* Add support for passing data to blockade addons from PHP
+* Add support for Bootstrap 4 Beta and Bootstrap 4
+
 = 0.9.11 (01/22/2018) =
 * Improve data encoding for JSON stored in HTML attributes 
 

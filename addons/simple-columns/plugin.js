@@ -13,8 +13,8 @@ tinymce.PluginManager.add('simple_columns', function(editor, url) {
 	var bootstrap_version = '3';
 	if( typeof editor.settings.wp_blockade_bootstrap_major_version !== 'undefined' && editor.settings.wp_blockade_bootstrap_major_version ) {
 		bootstrap_version = editor.settings.wp_blockade_bootstrap_major_version;
+		is_alpha = editor.settings.wp_blockade_bootstrap_4_alpha;
 	}
-
 	// add menu item to main blockade menu
 	var menu_item = {
 		text: 'Simple Columns',
@@ -27,7 +27,7 @@ tinymce.PluginManager.add('simple_columns', function(editor, url) {
 			{
 				text: '2 Columns (Left Sidebar)',
 				icon: 'blockade-simplecols-3-9',
-				onclick: function() { insertColumns([9,3], [3,-9]);}
+				onclick: function() { insertColumns([9,3],[3,-9],[12,1]);}
 			},
 			{
 				text: '2 Columns (Right Sidebar)',
@@ -42,7 +42,7 @@ tinymce.PluginManager.add('simple_columns', function(editor, url) {
 			{
 				text: '2 Columns (Feature Right)',
 				icon: 'blockade-simplecols-4-8',
-				onclick: function() { insertColumns([8,4],[4,-8]);}
+				onclick: function() { insertColumns([8,4],[4,-8],[12,1]);}
 			},
 			{
 				text: '3 Columns (Even)',
@@ -57,12 +57,12 @@ tinymce.PluginManager.add('simple_columns', function(editor, url) {
 			{
 				text: '3 Columns (Feature Center)',
 				icon: 'blockade-simplecols-3-6-3',
-				onclick: function() { insertColumns([6,3,3],[3,-6,0]);}
+				onclick: function() { insertColumns([6,3,3],[3,-6,0],[6,1,12]);}
 			},
 			{
 				text: '3 Columns (Feature Right)',
 				icon: 'blockade-simplecols-3-3-6',
-				onclick: function() { insertColumns([6,3,3],[6,-6,-6]);}
+				onclick: function() { insertColumns([6,3,3],[6,-6,-6],[12,1,2]);}
 			},
 			{
 				text: '4 Columns',
@@ -108,18 +108,27 @@ tinymce.PluginManager.add('simple_columns', function(editor, url) {
 	};
 
 	// Helper Functions
-	function insertColumns( cols, shifts ) {
+	function insertColumns( cols, shifts, ordering ) {
 		var col_prefix  = 'col-sm-';
 		var push_prefix = 'col-sm-push-';
 		var pull_prefix = 'col-sm-pull-';
 		if( bootstrap_version == '4' ) {
-			push_prefix = 'push-sm-';
-			pull_prefix = 'pull-sm-';
+			col_prefix = 'col-md-';
+			if( is_alpha ) {
+				push_prefix = 'push-md-';
+				pull_prefix = 'pull-md-';
+			}
 		}
 		if( typeof shifts === 'undefined' ) {
 			shifts = [];
 			for( var i = 0; i < cols.length; i++ ) {
 				shifts.push(0);
+			}
+		}
+		if( typeof ordering === 'undefined' ) {
+			ordering = [];
+			for( var i = 0; i < cols.length; i++ ) {
+				ordering.push(0);
 			}
 		}
 		if( blockade.isPlaceable( blockade.body ) ) {
@@ -137,7 +146,14 @@ tinymce.PluginManager.add('simple_columns', function(editor, url) {
 				temp = blockade.document.createElement('div');
 				blockade.addClass( temp, col_prefix + cols[i] );
 				if( shift ) {
-					blockade.addClass( temp, shift );
+					if( bootstrap_version != '4' || is_alpha ) {
+						blockade.addClass( temp, shift );
+					}
+				}
+				if( ordering[i] ) {
+					if( bootstrap_version == '4' && !is_alpha ) {
+						blockade.addClass( temp, 'order-md-' + ordering[i] );
+					}
 				}
 				blockade.setRole( temp, blockade.roles.container );
 				row.appendChild( temp );
