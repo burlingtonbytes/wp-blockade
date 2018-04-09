@@ -35,18 +35,19 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		// placeholder for the undo transaction function, until it is initialized
 		callback();
 	};
-	self.idbase     = 'wp-blockade';
-	self.classes    = {
-		blockade    : self.idbase,
-		html        : self.idbase + '-html',
-		body        : self.idbase + '-body',
-		showblocks  : self.idbase + '-showblocks',
-		wrapper     : self.idbase + '-wrapper',
-		editwrapper : self.idbase + '-editareawrapper',
-		controlbox  : self.idbase + '-controls',
-		comment     : self.idbase + "-comment",
-		shortcode   : self.idbase + "-shortcode",
-		rolebase    : self.idbase + '-role'
+	self.idbase       = 'wp-blockade';
+	self.classes      = {
+		blockade      : self.idbase,
+		html          : self.idbase + '-html',
+		body          : self.idbase + '-body',
+		showblocks    : self.idbase + '-showblocks',
+		wrapper       : self.idbase + '-wrapper',
+		editwrapper   : self.idbase + '-editareawrapper',
+		controlbox    : self.idbase + '-controls',
+		comment       : self.idbase + '-comment',
+		shortcode     : self.idbase + '-shortcode',
+		rolebase      : self.idbase + '-role',
+		controlbutton : self.idbase + '-control-button'
 	};
 	self.classes.usertypes = {
 		admin          : self.classes.rolebase + '-admin',
@@ -105,11 +106,12 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 				return data;
 			},
 			render_options : function( data ) {
+				var resafed_content = escapeHtml( unescapeHtml(data.type_specific.content) );
 				return {
 					'Comment': [
 						'<label>',
-							'<span>Comment Text: </span>',
-							'<input type="text" name="comment" class="mce-textbox" value="' + data.type_specific.content + '"/>',
+						'<span>Comment Text: </span>',
+						'<textarea name="comment" class="mce-textbox" rows="3">' + resafed_content + '</textarea>',
 						'</label>',
 					].join(''),
 					'Spacing': null,
@@ -162,6 +164,7 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 			}
 		},
 	};
+
 	var eventPrefix = self.idbase + '-event';
 	self.events = {
 		options : eventPrefix + 'options'
@@ -266,8 +269,8 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		self.editor     = tinymce.activeEditor;
 		self.document   = editor.getDoc();
 		self.body       = editor.getBody();
-        self.addonData  = editor.plugins.blockade.editor.settings.wp_blockade_addon_data;
-        // self.wrapInUndo = self.editor.undoManager.transact;
+		self.addonData  = editor.plugins.blockade.editor.settings.wp_blockade_addon_data;
+		// self.wrapInUndo = self.editor.undoManager.transact;
 		// !! START NASTY HACK  <-- addresses the fact that undoManager is sometimes uninitialized when this runs... no idea why yet, might be YOAST related (or other plugins)?
 		var waitForUndo = setInterval( function(){
 			if( self.editor.undoManager && self.editor.undoManager.transact ) {
@@ -289,11 +292,19 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 			// if we are looking at an empty and unlocked container (or the body itself is empty and unlocked)
 			if( isPlaceable(e.target) && e.target.innerHTML == "" ) {
 				self.lastFocusedBlock = e.target;
-				var el = placeBlock(createBlock("&nbsp;"));
-				var editareas = selectChildrenByRole( el, self.roles.editarea );
-				if( editareas && editareas.length > 0 ) {
-					setActiveEditor( editareas[0] );
-				}
+				self.addWindowOpen = true;
+				editor.windowManager.open({
+					buttons: [],
+					title: "Insert New Block",
+					width: 300,
+					height: 100,
+					body: {
+						type : 'listbox',
+						name : 'menuItems',
+						values: self.menu,
+						text: 'Select a Block'
+					}
+				})
 			}
 		});
 
@@ -417,12 +428,12 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		}
 		// clicked a lockposition button
 		if( editor.dom.hasClass(target, self.classes.controls.lockposition) ) {
-			toggleFlag(target, self.flags.lockposition)
+			toggleFlag(target, self.flags.lockposition);
 			return killEvent(e);
 		}
 		// clicked a lockstructure button
 		if( editor.dom.hasClass(target, self.classes.controls.lockstructure) ) {
-			toggleFlag(target, self.flags.lockstructure)
+			toggleFlag(target, self.flags.lockstructure);
 			return killEvent(e);
 		}
 
@@ -431,6 +442,29 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 			var blockParents = editor.dom.getParents(target, '.'+self.classes.wrapper);
 			if(blockParents[0] && isEditable(blockParents[0])) {
 				editor.fire(self.events.options, {target: blockParents[0]});
+			}
+			return killEvent(e);
+		}
+
+		// clicked an add button
+		if( editor.dom.hasClass(target, self.classes.controlbutton) ) {
+			var container = getParentByRole(target, self.roles.container, self.body),
+				blockParents = editor.dom.getParents(target, '.'+self.classes.wrapper);
+			if(container && isPlaceable(container)) {
+				self.lastFocusedBlock = blockParents[0];
+				self.addWindowOpen = true;
+				editor.windowManager.open({
+					buttons: [],
+					title: "Add New Blocks",
+					width: 300,
+					height: 100,
+					body: {
+						type : 'listbox',
+						name : 'menuItems',
+						values: self.menu,
+						text: 'Select a Block'
+					}
+				})
 			}
 			return killEvent(e);
 		}
@@ -621,7 +655,7 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 				self.wrapInUndo(function() {
 					apply_default_options_form_results( data, form_data, block );
 					if( type_options.apply_form_results ) {
-						 type_options.apply_form_results( data, form_data, block );
+						type_options.apply_form_results( data, form_data, block );
 					}
 					// This lets tiny mce do its thing on the html. Things like:
 					//  - cleaning up stray tags
@@ -926,7 +960,7 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 							}
 							ref.push(value);
 						} else {
-						ref[path[i]] = value;
+							ref[path[i]] = value;
 						}
 					} else {
 						if ( !ref[path[i]] ) {
@@ -1203,7 +1237,7 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 				} else if(
 					( e.target.tagName == "SPAN" &&  hasClass( e.target, 'blockade-options-color-picker-preview' ) ) ||
 					( e.target.tagName == "INPUT" &&  hasClass( e.target.parentElement, 'blockade-options-color-picker-input-container' ) )
-			 	) {
+				) {
 					var parent = e.target.parentElement;
 					toggleClass( parent, 'blockade-options-color-picker-open' );
 				} else if( e.target.tagName == "DIV" &&  hasClass( e.target, 'blockade-options-color-picker-cell' ) ) {
@@ -1328,7 +1362,7 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 					if( classes.indexOf(self.classes.wrapper)>-1 || classes.indexOf(self.classes.editwrapper)>-1 ) {
 						node.unwrap();
 					}
-					if( classes.indexOf(self.classes.controlbox)>-1 || classes.indexOf( self.classes.shortcode + '-preview' )>-1 ) {
+					if( classes.indexOf(self.classes.controlbox)>-1 || classes.indexOf( self.classes.shortcode + '-preview' )>-1 || classes.indexOf(self.classes.controlbutton)>-1) {
 						node.remove();
 					}
 					if( classes.indexOf(self.classes.comment) > -1 ) {
@@ -1452,7 +1486,7 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 			/^\s*<p>\s*<br\s+data-mce-bogus\s*=\s*"1"\s*>\s*<\/p>\s*$/gi.test(contents) ||
 			/^\s*<p>\s*<br\s+_moz_editor_bogus_node\s*=\s*"TRUE"\s*>\s*<\/p>\s*$/gi.test(contents) ||
 			/^\s*&nbsp;\s*(?:<br\/?>)?\s*$/gi.test(contents)) {
-		   return true;
+			return true;
 		}
 		return false;
 	}
@@ -1481,9 +1515,24 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 			});
 			self.lastFocusedBlock = el;
 			self.editor.nodeChanged();
+			scrollToBlock(el);
 			return el;
 		}
 		return null;
+	}
+	function scrollToBlock(el) {
+		addClass(el, 'focus-blockade-el');
+		setTimeout(function (el) {
+			removeClass(el, 'focus-blockade-el');
+		}, 10, el);
+		var iframe = tinymce.activeEditor.iframeElement;
+		if (iframe) {
+			el.scrollIntoView({
+				behavior: "smooth",
+				block: "center",
+				inline:"center"
+			});
+		}
 	}
 	function createBlock(content) {
 		var el    = wrapInContentBlock(content);
@@ -1518,7 +1567,8 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		}
 
 		wrap.appendChild(el);
-		wrap.appendChild(getMCEBlockadeControls(hasStructure, contenttype));
+		wrap.appendChild(getMCEBlockadeControlBar(hasStructure, contenttype));
+		wrap.appendChild(getBlockadeControlAdder());
 		return wrap;
 	}
 	function isBlockaded( content ) {
@@ -1538,7 +1588,14 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		el.innerHTML = content;
 		return el;
 	}
-	function getMCEBlockadeControls(hasStructure, contenttype) {
+	function getBlockadeControlAdder() {
+		var control = self.document.createElement('div');
+		addClass(control, self.classes.controlbutton);
+		control.setAttribute('title', "Insert Block Here" );
+		control.innerHTML = '<span>Insert Block Here</span>';
+		return control;
+	}
+	function getMCEBlockadeControlBar(hasStructure, contenttype) {
 		var name = 'Block';
 		var nameclass = '';
 		if(typeof self.contenttypes[contenttype] !== 'undefined' ) {
@@ -1652,6 +1709,10 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 					wrapper.parentNode.replaceChild(el, wrapper);
 				}
 			}
+		}
+		if (self.addWindowOpen) {
+			editor.windowManager.close();
+			self.addWindowOpen = false;
 		}
 	}
 	// type functions
@@ -2395,12 +2456,24 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 	}
 
 	function showSimpleBorders() {
-		document.getElementById( 'advanced-borders' ).style.display = 'none';
-		document.getElementById( 'simple-borders' ).style.display = 'table';
+		var adv_control = document.getElementById( 'advanced-borders' ),
+			simple_control = document.getElementById( 'simple-borders' );
+		if(adv_control) {
+			adv_control.style.display = 'none';
+		}
+		if(simple_control) {
+			simple_control.style.display = 'table';
+		}
 	}
-	 function showAdvancedBorders() {
-		document.getElementById( 'advanced-borders' ).style.display = 'table';
-		document.getElementById( 'simple-borders' ).style.display = 'none';
+	function showAdvancedBorders() {
+		var adv_control = document.getElementById( 'advanced-borders' ),
+			simple_control = document.getElementById( 'simple-borders' );
+		if(adv_control) {
+			adv_control.style.display = 'table';
+		}
+		if(simple_control) {
+			simple_control.style.display = 'none';
+		}
 	}
 
 	function triggerColorChange(element) {

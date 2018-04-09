@@ -5,11 +5,11 @@
  * Author: Burlington Bytes
  * Author URI: https://www.burlingtonbytes.com
  * Description: Lightweight and intuitive Visual Editor for Designers, Developers, and End Users.
- * Version: 0.9.12
+ * Version: 0.9.13
  */
 if( !class_exists('WP_Blockade') ) {
 	class WP_Blockade {
-		public static $version = 'v0.9.12';
+		public static $version = 'v0.9.13';
 		private static $_this;
 		private $plugin_dir;
 		private $plugin_dir_url;
@@ -263,6 +263,8 @@ if( !class_exists('WP_Blockade') ) {
 				$tinymce_options['apply_source_formatting'] = true;
 
 				// hook for addons
+				$tinymce_options['wp_blockade_addon_data']     = '';
+
 				$addon_data = apply_filters('wp_blockade_tinymce_addon_options', array());
 				$tinymce_options['wp_blockade_addon_data']  = json_encode($addon_data);
 			}

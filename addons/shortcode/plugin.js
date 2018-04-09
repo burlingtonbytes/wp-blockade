@@ -46,22 +46,19 @@ tinymce.PluginManager.add('blockade_shortcode', function(editor, url) {
 			return data;
 		},
 		render_html : function( data ) {
-			var shortcode = data.type_specific.shortcode.replace(/"/g, '&quot;');
+			var shortcode = blockade.escapeHtml(data.type_specific.shortcode);
 			var str = [
 				'<p>',
-					'<strong>NOTE:</strong> Blockade\'s live shortcode functionality ',
-					'currently only supports closed-form shortcodes. Adding a shortcode ',
-					'that wraps content will result in unexpected behavior.',
+				'<strong>NOTE:</strong> Blockade\'s live shortcode functionality ',
+				'currently only supports closed-form shortcodes. Adding a shortcode ',
+				'that wraps content will result in unexpected behavior.',
 				'</p>',
-				'<label><span>Shortcode: </span><input type="text" name="shortcode" class="mce-textbox" value="' + shortcode + '"/></label>'
+				'<label><span>Shortcode: </span><textarea name="shortcode" class="mce-textbox" >'+ shortcode + '</textarea></label>'
 			].join('');
 			return str;
 		},
 		apply_form_results : function( data, form_data, block ) {
-			var shortcode = form_data.shortcode.replace(/&quot;/g, '"');
-			block.innerHTML ='';
-			var el = blockade.build_shortcode_iframe( shortcode, form_data.classes );
-			block.appendChild( el );
+			var shortcode = blockade.unescapeHtml(form_data.shortcode);
 			block.innerHTML += '<!--' + blockade.classes.shortcode + '::' + shortcode + '-->'
 		}
 	};
