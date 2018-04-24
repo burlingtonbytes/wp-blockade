@@ -47,7 +47,12 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		comment       : self.idbase + '-comment',
 		shortcode     : self.idbase + '-shortcode',
 		rolebase      : self.idbase + '-role',
-		controlbutton : self.idbase + '-control-button'
+		controlbutton : self.idbase + '-control-button',
+		editoronly		: self.idbase + '-editoronly',
+		movewrapper		: self.idbase + '-movewrapper',
+		moveup				: self.idbase + '-moveup',
+		movedown			: self.idbase + '-movedown',
+		pseudoempty		: self.idbase + '-pseudo-empty',
 	};
 	self.classes.usertypes = {
 		admin          : self.classes.rolebase + '-admin',
@@ -173,8 +178,10 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 	self.dnd = {
 		placeholderclass : self.idbase + '-dnd-placeholder',
 		movingclass      : self.idbase + '-dnd-inprogress',
+		clickednodeclass : self.idbase + '-dnd-clickednode',
 		pxthreshold      : 15,
 		clickednode      : null,
+		originalnode		 : null,
 		movingnode       : null,
 		initialposition  : [0,0],
 		moved            : false
@@ -455,7 +462,7 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 				self.addWindowOpen = true;
 				editor.windowManager.open({
 					buttons: [],
-					title: "Add New Blocks",
+					title: "Insert New Block",
 					width: 300,
 					height: 100,
 					body: {
@@ -469,9 +476,109 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 			return killEvent(e);
 		}
 
+		// clicked a moveup button
+		if( editor.dom.hasClass(target, self.classes.moveup) ) {
+			var wrappers = editor.dom.getParents(target, '.'+self.classes.wrapper);
+			if (wrappers && wrappers[0] && isMoveable(wrappers[0])) {
+				var el = wrappers[0],
+						prevel = get_prev_el(el),
+						clone = deepClone(el);
+				while(true){
+					//if we have a next element
+					if (prevel) {
+						//if we have an element to place into
+						if (isPlaceable(prevel)) {
+							if (prevel.lastElementChild) {
+								editor.dom.insertAfter(clone,prevel.lastElementChild);
+								el.parentNode.removeChild(el);
+							} else {
+								prevel.appendChild(clone);
+								el.parentNode.removeChild(el);
+							}
+						} else if(containsPlaceableChildren(prevel)) {
+							prevel = prevel.lastElementChild;
+							continue;
+						} else {
+							if (isPlaceable(prevel.parentNode)) {
+								prevel.parentNode.insertBefore(clone,prevel);
+								el.parentNode.removeChild(el);
+							} else {
+								prevel = get_prev_el(prevel);
+								continue;
+							}
+						}
+					} else {
+						if (el.parentNode) {
+							wrapper = editor.dom.getParents(el.parentNode, '.'+self.classes.wrapper);
+							if (wrapper && wrapper[0]) {
+								wrapper[0].parentNode.insertBefore(clone,wrapper[0]);
+								el.parentNode.removeChild(el);
+							}
+						}
+					}
+					break;
+				}
+				if (clone) {
+					scrollToBlock(clone);
+					flashBlock(clone);
+				}
+			}
+			return killEvent(e);
+		}
+
+		// clicked a movedown button
+		if( editor.dom.hasClass(target, self.classes.movedown) ) {
+			var wrappers = editor.dom.getParents(target, '.'+self.classes.wrapper);
+			if (wrappers && wrappers[0] && isMoveable(wrappers[0])) {
+				var el = wrappers[0],
+						nextel = get_next_el(el),
+						clone = deepClone(el);
+				while(true){
+					//if we have a next element
+					if (nextel) {
+						//if we have an element to place into
+						if (isPlaceable(nextel)) {
+							if (nextel.firstElementChild) {
+								nextel.insertBefore(clone,nextel.firstElementChild);
+								el.parentNode.removeChild(el);
+							} else {
+								nextel.appendChild(clone);
+								el.parentNode.removeChild(el);
+							}
+						} else if(containsPlaceableChildren(nextel)) {
+							nextel = nextel.firstElementChild;
+							continue;
+						} else {
+							if (isPlaceable(nextel.parentNode)) {
+								editor.dom.insertAfter(clone,nextel);
+								el.parentNode.removeChild(el);
+							} else {
+								nextel = get_next_el(nextel);
+								continue;
+							}
+						}
+					} else {
+						if (el.parentNode) {
+							wrapper = editor.dom.getParents(el.parentNode, '.'+self.classes.wrapper);
+							if (wrapper && wrapper[0]) {
+								editor.dom.insertAfter(clone,wrapper[0]);
+								el.parentNode.removeChild(el);
+							}
+						}
+					}
+					break;
+				}
+				if (clone) {
+					scrollToBlock(clone);
+					flashBlock(clone);
+				}
+			}
+			return killEvent(e);
+		}
+
 		// drag/drop handler
 		var draggable = getDraggableWrapper(target);
-		if(draggable) {
+		if(draggable && !self.dnd.clickednode) {
 			removeActiveEditor();
 			self.dnd.clickednode     = draggable;
 			self.dnd.initialposition = [e.clientX, e.clientY];
@@ -492,18 +599,20 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		if(self.dnd.clickednode && !self.dnd.movingnode) {
 			if(distanceBetween(point, self.dnd.initialposition) > self.dnd.pxthreshold) {
 				self.editor.undoManager.add();
-				self.dnd.movingnode = cloneAndReplaceWithPlaceholder(self.dnd.clickednode);
+				self.dnd.movingnode = cloneAndAddPlaceholder(self.dnd.clickednode);
+				addClass(self.dnd.clickednode,self.dnd.clickednodeclass);
 				self.dnd.moved      = true;
 				addClass(self.document.documentElement, self.dnd.movingclass);
+				toggleFlag(self.dnd.clickednode,self.flags.lockstructure);
 			}
 		}
 		if(self.dnd.movingnode) { /*move placeholder around the dom*/
 			var hovered = self.document.elementFromPoint(point[0], point[1]);
-			if(!hasClass(hovered, self.dnd.placeholderclass)) {
+			if(hovered && !hasClass(hovered, self.dnd.placeholderclass)) {
 				var dropTarget = false;
 				if(hasRole(hovered, self.roles.container) && isPlaceable(hovered)) {
 					dropTarget = hovered;
-				} else {
+				} else if(hovered) {
 					var containerParents = getParentsByRole(hovered, self.roles.container, self.body);
 					for(var i=0;i<containerParents.length;i++) {
 						if(isPlaceable(containerParents[i])) {
@@ -526,6 +635,13 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 							dropTarget.appendChild(placeholder);
 						}
 					}
+					var matches = editor.getDoc().querySelectorAll('.' + self.classes.pseudoempty);
+					matches.forEach(function(element){
+						element.classList.remove(self.classes.pseudoempty);
+					});
+					if (dropTarget.childNodes && dropTarget.childNodes.length === 1) {
+						addClass(dropTarget,self.classes.pseudoempty);
+					}
 				}
 			}
 		}
@@ -535,8 +651,16 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		if (e.which === 3 || e.button === 2) {
 			return;
 		}
-		self.dnd.clickednode = null;
+		var matches = editor.getDoc().querySelectorAll('.' + self.classes.pseudoempty);
+		matches.forEach(function(element){
+			element.classList.remove(self.classes.pseudoempty);
+		});
+
 		if(self.dnd.movingnode) {
+			// self.dnd.clickednode.parentNode.removeChild(self.dnd.clickednode);
+			removeClass(self.dnd.clickednode,self.dnd.clickednodeclass);
+			toggleFlag(self.dnd.clickednode,self.flags.lockstructure);
+			self.dnd.clickednode = null;
 			var el = replacePlaceholderWithElement(self.dnd.movingnode);
 			self.dnd.moved       = false;
 			self.dnd.movingnode  = null;
@@ -544,8 +668,12 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 			self.wrapInUndo(function(){});
 			self.lastFocusedBlock = el;
 			self.editor.nodeChanged();
+			scrollToBlock(el);
+			flashBlock(el);
 			return killEvent(e);
 		}
+		self.dnd.clickednode = null;
+
 		// clicked an editor
 		var target = e.target;
 		if(hasRole(target, self.roles.editarea) && isEditable(target)) {
@@ -557,7 +685,9 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 			setActiveEditor(editorParent);
 			return;
 		}
+
 	});
+
 
 	editor.on(self.events.options, function(e) {
 		var el = e.target;
@@ -574,7 +704,86 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		self.lastFocusedBlock = el;
 		self.editor.nodeChanged();
 	});
+	editor.on('mouseover',function(e){
+		var el = e.target;
+		wrapper = editor.dom.getParents(el, '.'+self.classes.wrapper);
+		var matches = editor.getDoc().querySelectorAll(".ishovered");
+		matches.forEach(function(element){
+			element.classList.remove('ishovered');
+		});
+		if (wrapper && wrapper[0]){
+			wrapper[0].classList.add('ishovered');
+		}
+	});
+	function containsPlaceableChildren(current_el){
+		var has_placeable = false;
+		current_el.childNodes.forEach(function(element){
+			if (has_placeable) {
+				return;
+			}
+			if (isPlaceable(element)) {
+				has_placeable = true;
+			} else {
+				has_placeable = containsPlaceableChildren(element);
+			}
 
+		});
+		return has_placeable;
+	}
+	function isDescendant(parent, child) {
+		var node = child.parentNode;
+		while (node != null) {
+			if (node == parent) {
+		  	return true;
+		 	}
+		 	node = node.parentNode;
+		}
+		return false;
+	}
+	function get_prev_el(current_el){
+		var prev_el = current_el.previousElementSibling,
+				wrapper;
+		//if the el does have a sibling, return it
+		if (prev_el) {
+			return prev_el;
+		}
+		//if the el doesn't have a sibling, but does have a parent
+		if (current_el.parentNode) {
+			if (current_el.parentNode && !current_el.parentNode.previousElementSibling) {
+				return get_prev_el(current_el.parentNode);
+			} else {
+				if (isPlaceable(current_el.parentNode.previousSibling)) {
+					return current_el.parentNode.previousSibling;
+				}
+				//return current_el.parentNode.nextSibling;
+			}
+		}
+		//we couldn't find a suitable next element
+		//so we will return null
+		return null;
+	}
+	function get_next_el(current_el){
+		var next_el = current_el.nextElementSibling,
+				wrapper;
+		//if the el does have a sibling, return it
+		if (next_el) {
+			return next_el;
+		}
+		//if the el doesn't have a sibling, but does have a parent
+		if (current_el.parentNode) {
+			if (current_el.parentNode && !current_el.parentNode.nextSibling) {
+				return get_next_el(current_el.parentNode);
+			} else {
+				if (isPlaceable(current_el.parentNode.nextSibling)) {
+					return current_el.parentNode.nextSibling;
+				}
+				//return current_el.parentNode.nextSibling;
+			}
+		}
+		//we couldn't find a suitable next element
+		//so we will return null
+		return null;
+	}
 	function open_edit_window( block, type ) {
 		var data = {
 			unknown        : {},
@@ -1362,7 +1571,7 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 					if( classes.indexOf(self.classes.wrapper)>-1 || classes.indexOf(self.classes.editwrapper)>-1 ) {
 						node.unwrap();
 					}
-					if( classes.indexOf(self.classes.controlbox)>-1 || classes.indexOf( self.classes.shortcode + '-preview' )>-1 || classes.indexOf(self.classes.controlbutton)>-1) {
+					if( classes.indexOf(self.classes.editoronly)>-1) {
 						node.remove();
 					}
 					if( classes.indexOf(self.classes.comment) > -1 ) {
@@ -1520,6 +1729,15 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		}
 		return null;
 	}
+	function flashBlock(el){
+		if (!el) {
+			return;
+		}
+		addClass(el, 'focus-blockade-el');
+		setTimeout(function (el) {
+			removeClass(el, 'focus-blockade-el');
+		}, 10, el);
+	}
 	function scrollToBlock(el) {
 		addClass(el, 'focus-blockade-el');
 		setTimeout(function (el) {
@@ -1569,6 +1787,7 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		wrap.appendChild(el);
 		wrap.appendChild(getMCEBlockadeControlBar(hasStructure, contenttype));
 		wrap.appendChild(getBlockadeControlAdder());
+		wrap.appendChild(getBlockadeMoveUpDown());
 		return wrap;
 	}
 	function isBlockaded( content ) {
@@ -1591,10 +1810,23 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 	function getBlockadeControlAdder() {
 		var control = self.document.createElement('div');
 		addClass(control, self.classes.controlbutton);
+		addClass(control, self.classes.editoronly);
 		control.setAttribute('title', "Insert Block Here" );
 		control.innerHTML = '<span>Insert Block Here</span>';
 		return control;
 	}
+	function getBlockadeMoveUpDown() {
+		var control = self.document.createElement('div');
+		addClass(control, self.classes.editoronly);
+		addClass(control, self.classes.movewrapper);
+		control.innerHTML = '';
+		control.innerHTML +=
+			'<div title="Move Block Up" class="' + self.classes.moveup +'"><span>Move Block Up</span></div>';
+		control.innerHTML +=
+			'<div title="Move Block Down" class="' + self.classes.movedown +'"><span>Move Block Down</span></div>';
+		return control;
+	}
+
 	function getMCEBlockadeControlBar(hasStructure, contenttype) {
 		var name = 'Block';
 		var nameclass = '';
@@ -1606,6 +1838,8 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		}
 		controls = self.document.createElement('div');
 		addClass(controls, self.classes.controlbox);
+		addClass(controls, self.classes.editoronly);
+
 		var output = '';
 
 		output += [
@@ -1751,8 +1985,12 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		return selectChildrenByDataFieldValues(el, self.datafields.role, role)
 	}
 	function getParentByRole(el, role, fallback) {
-		for ( ; el && el !== fallback; el = el.parentNode ) {
-			if(el.nodeName == 'HTML') return false;
+		if (typeof el === 'undefined' || typeof el.parentNode === 'undefined' || typeof el.nodeName === 'undefined') {
+			return fallback;
+		}
+		while(el && el !== fallback){
+			el = el.parentNode;
+			if(el.nodeName == 'HTML' || el.nodeName == '#document') return false;
 			if ( hasRole(el, role) ) {
 				return el;
 			}
@@ -1761,9 +1999,13 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 	}
 	function getParentsByRole(el, role, fallback) {
 		var matches = [];
-		for ( ; el && el !== fallback; el = el.parentNode ) {
+		if (!role || typeof el === 'undefined' || typeof el.parentNode === 'undefined' || typeof el.nodeName === 'undefined') {
+			return fallback;
+		}
+		while(el && el !== fallback && el.parentNode && el.parentNode.nodeName !== '#document'){
+			el = el.parentNode;
 			if(el.nodeName == 'HTML') return matches;
-			if ( hasRole(el, role) ) {
+			if (el && hasRole(el, role) ) {
 				matches.push(el);
 			}
 		}
@@ -1773,20 +2015,23 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 	function toggleFlag(el, flag) {
 		if(isBlockadeAdmin()) {
 			removeActiveEditor();
-			var parentWrapper = getParentByClass(el, self.classes.wrapper, self.body);
-			if(parentWrapper !== self.body) {
-				var block     = parentWrapper.firstChild;
+			var wrapper = el;
+			if (!hasClass(el,self.classes.wrapper)) {
+				wrapper = getParentByClass(el, self.classes.wrapper, self.body);
+			}
+			if(wrapper !== self.body) {
+				var block     = wrapper.firstChild;
 				var flagClass = self.datafields.flags+'-'+flag;
 				self.wrapInUndo(function() {
-					if(hasClass(parentWrapper, flagClass)) {
-						removeClass(parentWrapper, flagClass);
+					if(hasClass(wrapper, flagClass)) {
+						removeClass(wrapper, flagClass);
 						removeFlag(block, flag);
 					} else {
-						addClass(parentWrapper, flagClass);
+						addClass(wrapper, flagClass);
 						addFlag(block, flag);
 					}
 				});
-				self.lastFocusedBlock = parentWrapper;
+				self.lastFocusedBlock = wrapper;
 			}
 		}
 	}
@@ -1865,7 +2110,7 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		}
 		return true;
 	}
-	function isDraggable(el) {
+	function isMoveable(el) {
 		if(isActiveEditor(el)) {
 			return false;
 		}
@@ -1886,13 +2131,15 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		}
 		var parentWithLockedStructure = getParentByClass(el, lockStructureClass, self.body);
 		var parentWithLockedContent = getParentByClass(el, lockContentClass, self.body);
-		if(parentWithLockedStructure !== self.body || parentWithLockedContent!== self.body) {
+		if(parentWithLockedStructure !== self.body || parentWithLockedContent !== self.body) {
 			return false;
 		}
-
 		return true;
 	}
 	function isPlaceable(el) {
+		if (el.nodeName == '#text') {
+			return false;
+		}
 		if( !( el === self.body || hasRole( el, self.roles.container ) ) ) {
 			return false;
 		}
@@ -1940,11 +2187,11 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 			return false;
 		}
 
-		if(hasRole(el,self.roles.editarea) && !isDraggable(el) ) {
+		if(hasRole(el,self.roles.editarea) && !isMoveable(el) ) {
 			return false;
 		}
 		if(self.editor.dom.hasClass(el, self.classes.wrapper)) {
-			if(isDraggable(el)) {
+			if(isMoveable(el)) {
 				return el;
 			} else {
 				return false;
@@ -1953,14 +2200,15 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		return(getDraggableWrapper(el.parentNode));
 	}
 
-	function cloneAndReplaceWithPlaceholder(el) {
+	function cloneAndAddPlaceholder(el) {
 		var height = el.offsetHeight;
 		var clone = el.cloneNode(true);
 		var placeholder = self.document.createElement('div');
 		addClass(placeholder, self.dnd.placeholderclass);
-		placeholder.style.height = ''+height+'px';
-		el.parentNode.replaceChild(placeholder, el);
-		return clone;
+		// placeholder.style.height = ''+height+'px';
+		el.parentNode.insertBefore(placeholder, el);
+
+		return el;
 	}
 	function replacePlaceholderWithElement(el) {
 		var placeholders = selectChildrenByClass(self.body, self.dnd.placeholderclass);
@@ -2030,7 +2278,7 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		].join('');
 		var el = self.document.createElement('iframe');
 		el.setAttribute( 'src', uri );
-		el.setAttribute( 'class',  self.classes.shortcode + '-preview' );
+		el.setAttribute( 'class',  self.classes.shortcode + '-preview ' + self.classes.editoronly );
 		el.setAttribute( 'scrolling', 'no');
 		el.setAttribute( 'onload', 'window.top.wp_blockade_resize_iframe(this);' );
 		return el;
@@ -2384,7 +2632,11 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 		return addClass(el, cls);
 	}
 	function getParentByClass(el, cls, fallback) {
-		for( ; el && el !== fallback; el = el.parentNode ) {
+		if (typeof el === 'undefined' || typeof el.parentNode === 'undefined' || typeof el.nodeName === 'undefined') {
+			return fallback;
+		}
+		while(el && el !== fallback){
+			el = el.parentNode;
 			if(el.nodeName == 'HTML') return false;
 			if ( hasClass(el, cls) ) {
 				return el;
@@ -2394,7 +2646,11 @@ tinymce.PluginManager.add('blockade', function(editor, url) {
 	}
 	function getPathToParentByClass(el, cls, fallback) {
 		var path = [];
-		for ( ; el && el !== fallback; el = el.parentNode ) {
+		if (typeof el === 'undefined' || typeof el.parentNode === 'undefined' || typeof el.nodeName === 'undefined') {
+			return fallback;
+		}
+		while(el && el !== fallback){
+			el = el.parentNode;
 			if(el.nodeName == 'HTML') return path;
 			path.push(el)
 			if ( hasClass(el, cls) ) {

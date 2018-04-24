@@ -59,6 +59,9 @@ tinymce.PluginManager.add('blockade_shortcode', function(editor, url) {
 		},
 		apply_form_results : function( data, form_data, block ) {
 			var shortcode = blockade.unescapeHtml(form_data.shortcode);
+			block.innerHTML ='';
+			var el = blockade.build_shortcode_iframe( shortcode, form_data.classes );
+			block.appendChild( el );
 			block.innerHTML += '<!--' + blockade.classes.shortcode + '::' + shortcode + '-->'
 		}
 	};

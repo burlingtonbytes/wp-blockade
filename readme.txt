@@ -69,12 +69,22 @@ Not at all! Blockade is a true visual editor, with all options controllable in a
 
 == Changelog ==
 
+= 0.9.14 (04/24/2018) =
+* Move blocks with arrow control as well as drag/drop
+* Improved drag/drop interface
+* Tightened up UI
+* Fixed bug with shortcode block rendering duplicates
+
+= 0.9.13 (04/24/2018) =
+* Added new "Add Block Here" control
+* Blocks visually highlight and scroll into view, when added
+
 = 0.9.12 (02/27/2018) =
 * Add support for passing data to blockade addons from PHP
 * Add support for Bootstrap 4 Beta and Bootstrap 4
 
 = 0.9.11 (01/22/2018) =
-* Improve data encoding for JSON stored in HTML attributes 
+* Improve data encoding for JSON stored in HTML attributes
 
 = 0.9.10 (01/11/2018) =
 * Whitelist blockade html for restricted user roles
