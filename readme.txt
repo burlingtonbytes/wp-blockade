@@ -75,7 +75,7 @@ Not at all! Blockade is a true visual editor, with all options controllable in a
 * Tightened up UI
 * Fixed bug with shortcode block rendering duplicates
 
-= 0.9.13 (04/24/2018) =
+= 0.9.13 (04/10/2018) =
 * Added new "Add Block Here" control
 * Blocks visually highlight and scroll into view, when added
 
